@@ -1,0 +1,33 @@
+# ============================================================================
+# Netlify deploy konfiguratsiyasi — EduLens (TanStack Start, SPA rejimi)
+# Statik SPA sifatida deploy qilinadi; ma'lumotlar client tomonda Supabase orqali.
+# ============================================================================
+
+[build]
+  # package-lock.json Windows'da yaratilgani uchun Linux Rollup native binary
+  # yo'q (npm optional-deps bug'i). Lock'ni o'chirib toza npm install qilamiz —
+  # shunda Linux uchun to'g'ri binary o'rnatiladi.
+  command = "rm -rf node_modules package-lock.json && npm install && npm run build"
+  publish = "dist/client"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Quyidagilar PUBLIC (anon) kalit + URL — client bundle'ga baribir kiritiladi, xavfsiz.
+  # Xohlasangiz Netlify dashboard (Site settings → Environment variables) orqali ham
+  # o'rnatishingiz mumkin — dashboard qiymatlari ustun bo'ladi.
+  VITE_SUPABASE_URL = "https://irkoxlxdpkisfvwtxsga.supabase.co"
+  VITE_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlya294bHhkcGtpc2Z2d3R4c2dhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NjgzNjMsImV4cCI6MjA5NjM0NDM2M30.g0DWKm0YRlKgi2_XQ8H0xHN28bkfZRPMPv7KTbUDIOE"
+
+# Statik resurslarni keshlash (assets — hash bilan, abadiy keshlash mumkin)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# SPA fallback — mavjud bo'lmagan barcha yo'llar index.html ga yo'naltiriladi.
+# Haqiqiy fayllar (/assets/*, /logo.png) avval xizmat qilinadi; faqat topilmaganlar
+# index.html ga tushadi va client router (TanStack Router) ularni boshqaradi.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
