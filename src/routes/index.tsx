@@ -45,6 +45,17 @@ import {
   Phone,
   MapPin,
   Send,
+  Megaphone,
+  BookOpen,
+  Footprints,
+  Target,
+  Telescope,
+  Pencil,
+  Map,
+  MessageCircleQuestion,
+  Sparkles,
+  PartyPopper,
+  Landmark,
 } from "lucide-react";
 
 // "Kelajak" markazining ochiq sahifasi — login'siz (anon) ishlaydi
@@ -160,6 +171,28 @@ function CountUp({ target }: { target: number }) {
   return <span ref={ref}>{value.toLocaleString("uz-UZ")}</span>;
 }
 
+/* ─── Hero rasmi ───────────────────────────────────────────────────────────────
+   public/hero-student.png faylini qo'ysangiz — haqiqiy surat chiqadi (fonsiz PNG
+   ideal). Fayl bo'lmasa ikonli fallback ko'rsatiladi. */
+function HeroImage() {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <span className="landing-float-slow mb-4 inline-flex h-32 w-32 items-center justify-center rounded-full bg-white text-violet-600 shadow-xl md:h-40 md:w-40">
+        <GraduationCap className="h-16 w-16 md:h-20 md:w-20" aria-hidden="true" />
+      </span>
+    );
+  }
+  return (
+    <img
+      src="/hero-student.png"
+      alt="Kelajak markazi o'quvchisi"
+      className="h-48 w-auto object-contain object-bottom drop-shadow-xl md:h-64"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 /* ─── Suzib yuruvchi stiker ────────────────────────────────────────────────── */
 function Sticker({
   children,
@@ -270,9 +303,15 @@ function Index() {
           <div className="overflow-hidden whitespace-nowrap py-2">
             <div className="landing-marquee inline-block">
               {Array.from({ length: 2 }).map((_, i) => (
-                <span key={i} className="mx-8 text-sm font-semibold text-white">
-                  📣 {latestNews.title} — batafsil o'qish uchun bosing
-                  <span className="mx-8 opacity-50">•</span>⭐ Kelajak sen bilan boshlanadi
+                <span
+                  key={i}
+                  className="mx-8 inline-flex items-center text-sm font-semibold text-white"
+                >
+                  <Megaphone className="mr-2 inline h-4 w-4" aria-hidden="true" />
+                  {latestNews.title} — batafsil o'qish uchun bosing
+                  <span className="mx-8 opacity-50">•</span>
+                  <Star className="mr-2 inline h-4 w-4 fill-current" aria-hidden="true" />
+                  Kelajak sen bilan boshlanadi
                   <span className="mx-8 opacity-50">•</span>
                 </span>
               ))}
@@ -284,37 +323,42 @@ function Index() {
       <main>
         {/* ── HERO ── */}
         <section className="relative mx-auto max-w-7xl px-4 pb-10 pt-14 text-center md:px-8 md:pt-20">
-          {/* Suzib yuruvchi stikerlar */}
+          {/* Suzib yuruvchi yorliqlar — haqiqiy ikonlar bilan */}
           <Sticker className="left-[4%] top-24 hidden md:block" rot={-8}>
-            <span className="inline-block rounded-2xl bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-700 shadow-sm">
-              📚 Bilim sari yuksalish
+            <span className="inline-flex items-center gap-2 rounded-2xl bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-700 shadow-sm">
+              <BookOpen className="h-4 w-4" aria-hidden="true" /> Bilim sari yuksalish
             </span>
           </Sticker>
           <Sticker className="right-[5%] top-32 hidden md:block" rot={6} slow>
-            <span className="inline-block rounded-2xl bg-rose-100 px-4 py-2 text-sm font-bold text-rose-600 shadow-sm">
-              💬 Har kun yangi qadam
+            <span className="inline-flex items-center gap-2 rounded-2xl bg-rose-100 px-4 py-2 text-sm font-bold text-rose-600 shadow-sm">
+              <Footprints className="h-4 w-4" aria-hidden="true" /> Har kun yangi qadam
             </span>
           </Sticker>
           <Sticker className="bottom-40 left-[8%] hidden lg:block" rot={-5} slow>
-            <span className="inline-block rounded-2xl bg-violet-100 px-4 py-2 text-sm font-bold text-violet-700 shadow-sm">
-              🏃 Yangi marralar sari
+            <span className="inline-flex items-center gap-2 rounded-2xl bg-violet-100 px-4 py-2 text-sm font-bold text-violet-700 shadow-sm">
+              <Target className="h-4 w-4" aria-hidden="true" /> Yangi marralar sari
             </span>
           </Sticker>
           <Sticker className="bottom-48 right-[7%] hidden lg:block" rot={7}>
-            <span className="inline-block rounded-2xl bg-amber-100 px-4 py-2 text-sm font-bold text-amber-700 shadow-sm">
-              🔭 Yangi orzular sari
+            <span className="inline-flex items-center gap-2 rounded-2xl bg-amber-100 px-4 py-2 text-sm font-bold text-amber-700 shadow-sm">
+              <Telescope className="h-4 w-4" aria-hidden="true" /> Yangi orzular sari
             </span>
           </Sticker>
-          <Sticker className="left-[18%] top-10 hidden text-4xl lg:block" rot={-10}>
-            ✏️
+          <Sticker className="left-[18%] top-10 hidden lg:block" rot={-10}>
+            <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-100 text-fuchsia-600 shadow-sm">
+              <Pencil className="h-6 w-6" aria-hidden="true" />
+            </span>
           </Sticker>
-          <Sticker className="right-[20%] top-8 hidden text-4xl lg:block" rot={12} slow>
-            🚀
+          <Sticker className="right-[20%] top-8 hidden lg:block" rot={12} slow>
+            <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-600 shadow-sm">
+              <Rocket className="h-6 w-6" aria-hidden="true" />
+            </span>
           </Sticker>
 
           <Reveal>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-5 py-2.5 text-sm font-extrabold tracking-wide text-violet-700 shadow-sm">
-              ⭐ KELAJAK SEN BILAN BOSHLANADI
+              <Star className="h-4 w-4 fill-violet-500 text-violet-500" aria-hidden="true" />
+              KELAJAK SEN BILAN BOSHLANADI
             </div>
           </Reveal>
 
@@ -362,9 +406,7 @@ function Index() {
             <div className="absolute bottom-0 left-1/2 h-[340px] w-[340px] -translate-x-1/2 translate-y-1/2 rounded-full bg-violet-300/60 md:h-[480px] md:w-[480px]" />
             <div className="absolute bottom-0 left-1/2 h-[210px] w-[210px] -translate-x-1/2 translate-y-1/2 rounded-full bg-violet-400/50 md:h-[300px] md:w-[300px]" />
             <div className="absolute inset-x-0 bottom-0 flex justify-center">
-              <span className="landing-float-slow inline-block text-8xl drop-shadow-lg md:text-9xl">
-                🧑‍🎓
-              </span>
+              <HeroImage />
             </div>
           </div>
         </section>
@@ -396,7 +438,7 @@ function Index() {
           <Reveal>
             <div className="mb-10 text-center">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-violet-100 px-4 py-2 text-sm font-bold text-violet-700">
-                🏛 "Kelajak" binosida
+                <Landmark className="h-4 w-4" aria-hidden="true" /> "Kelajak" binosida
               </div>
               <h2 className="mb-3 text-4xl font-extrabold text-indigo-950 md:text-5xl">
                 To'garaklarimiz
@@ -411,7 +453,7 @@ function Index() {
           {(centerClubs ?? []).length === 0 ? (
             <Reveal>
               <p className="rounded-3xl border border-violet-100 bg-white p-12 text-center text-slate-500">
-                To'garaklar ro'yxati tez orada e'lon qilinadi. 🚀
+                To'garaklar ro'yxati tez orada e'lon qilinadi.
               </p>
             </Reveal>
           ) : (
@@ -487,8 +529,8 @@ function Index() {
         <section id="yol" className="mx-auto max-w-6xl scroll-mt-20 px-4 pt-24 md:px-8">
           <Reveal>
             <div className="mb-12 text-center">
-              <h2 className="mb-3 text-4xl font-extrabold text-indigo-950 md:text-5xl">
-                Sening yo'ling 🗺
+              <h2 className="mb-3 flex items-center justify-center gap-3 text-4xl font-extrabold text-indigo-950 md:text-5xl">
+                <Map className="h-9 w-9 text-violet-600" aria-hidden="true" /> Sening yo'ling
               </h2>
               <p className="mx-auto max-w-2xl text-lg text-slate-600">
                 Markazda har bir o'quvchi 4 qadamda o'z kelajagini topadi.
@@ -500,7 +542,6 @@ function Index() {
             {[
               {
                 icon: Brain,
-                emoji: "🧠",
                 title: "Testlarni topshir",
                 text: "Holland, IQ, temperament — 8 ta ilmiy test sening kuchli tomonlaringni aniqlaydi.",
                 bg: "bg-violet-100",
@@ -508,7 +549,6 @@ function Index() {
               },
               {
                 icon: Compass,
-                emoji: "🧭",
                 title: "O'zingni kashf et",
                 text: "Shaxsiy portfolio: radar diagramma, IQ, qiziqishlar — hammasi bir sahifada.",
                 bg: "bg-emerald-100",
@@ -516,7 +556,6 @@ function Index() {
               },
               {
                 icon: GraduationCap,
-                emoji: "🎓",
                 title: "Kasbingni tanla",
                 text: "AI tavsiyasi bilan senga eng mos kasblar va universitetlar ro'yxati.",
                 bg: "bg-amber-100",
@@ -524,7 +563,6 @@ function Index() {
               },
               {
                 icon: Rocket,
-                emoji: "🚀",
                 title: "To'garakda rivojlan",
                 text: "Qiziqishingga mos to'garakka yozil va orzuing sari birinchi qadamni tashla.",
                 bg: "bg-rose-100",
@@ -537,9 +575,9 @@ function Index() {
                     {i + 1}-qadam
                   </div>
                   <div
-                    className={`mx-auto mb-4 mt-2 flex h-16 w-16 items-center justify-center rounded-2xl text-3xl ${s.bg} transition-transform group-hover:scale-110 group-hover:-rotate-6`}
+                    className={`mx-auto mb-4 mt-2 flex h-16 w-16 items-center justify-center rounded-2xl ${s.bg} ${s.fg} transition-transform group-hover:scale-110 group-hover:-rotate-6`}
                   >
-                    {s.emoji}
+                    <s.icon className="h-8 w-8" aria-hidden="true" />
                   </div>
                   <h3 className={`mb-2 text-lg font-extrabold ${s.fg}`}>{s.title}</h3>
                   <p className="text-sm leading-relaxed text-slate-600">{s.text}</p>
@@ -618,8 +656,9 @@ function Index() {
         {/* ── FAQ ── */}
         <section className="mx-auto max-w-3xl px-4 pt-24 md:px-8">
           <Reveal>
-            <h2 className="mb-8 text-center text-4xl font-extrabold text-indigo-950">
-              Ko'p so'raladigan savollar 💬
+            <h2 className="mb-8 flex items-center justify-center gap-3 text-center text-4xl font-extrabold text-indigo-950">
+              <MessageCircleQuestion className="h-9 w-9 text-violet-600" aria-hidden="true" />
+              Ko'p so'raladigan savollar
             </h2>
           </Reveal>
           <Reveal delay={120}>
@@ -672,11 +711,11 @@ function Index() {
         <section id="aloqa" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-24 md:px-8">
           <Reveal>
             <div className="relative overflow-hidden rounded-[32px] bg-indigo-950 p-10 text-white md:p-14">
-              <Sticker className="right-8 top-8 text-5xl" rot={10}>
-                ✨
+              <Sticker className="right-8 top-8" rot={10}>
+                <Sparkles className="h-10 w-10 text-fuchsia-300/80" aria-hidden="true" />
               </Sticker>
-              <Sticker className="bottom-8 left-10 hidden text-5xl md:block" rot={-8} slow>
-                🎯
+              <Sticker className="bottom-8 left-10 hidden md:block" rot={-8} slow>
+                <Target className="h-10 w-10 text-violet-300/80" aria-hidden="true" />
               </Sticker>
               <div className="relative z-10 grid items-center gap-8 md:grid-cols-2">
                 <div>
@@ -709,7 +748,7 @@ function Index() {
       </main>
 
       <footer className="border-t border-violet-100 bg-white py-8 text-center text-sm text-slate-400">
-        © {new Date().getFullYear()} "Kelajak" markazi — kelajak sen bilan boshlanadi ⭐
+        © {new Date().getFullYear()} "Kelajak" markazi — kelajak sen bilan boshlanadi
       </footer>
 
       {/* ── Qiziqish bildirish dialogi ── */}
@@ -763,7 +802,9 @@ function ApplyDialog({ club, onClose }: { club: CenterClub | null; onClose: () =
       <DialogContent className="sm:max-w-md">
         {sent ? (
           <div className="py-6 text-center">
-            <p className="mb-3 text-5xl">🎉</p>
+            <span className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+              <PartyPopper className="h-8 w-8" aria-hidden="true" />
+            </span>
             <DialogTitle className="mb-2">Arizangiz qabul qilindi!</DialogTitle>
             <p className="text-sm text-muted-foreground">
               Tez orada mas'ul xodimimiz siz bilan bog'lanadi.
