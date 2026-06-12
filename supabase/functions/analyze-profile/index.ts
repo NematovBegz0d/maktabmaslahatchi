@@ -77,7 +77,7 @@ Deno.serve(async (req: Request) => {
     const age = ageFrom(profile?.birth_date ?? null);
     const lines: string[] = [];
     for (const r of resultList) {
-      const tt = (r.tests as { test_type?: string; name_uz?: string } | null);
+      const tt = r.tests as { test_type?: string; name_uz?: string } | null;
       const ss = (r.scaled_scores as Record<string, number> | null) ?? {};
       const parts = Object.entries(ss)
         .filter(([k]) => k !== "reliable")

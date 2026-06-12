@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ProtectedRoute } from "@/components/protected-route";
 import { AppHeader } from "@/components/app-header";
@@ -11,14 +11,27 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import {
-  ClipboardList, CheckCircle2, Sparkles, ArrowRight,
-  Users, TrendingUp, Brain, FileText,
-  UserPlus, AlertCircle, BarChart3, GraduationCap,
+  ClipboardList,
+  CheckCircle2,
+  Sparkles,
+  ArrowRight,
+  Users,
+  TrendingUp,
+  Brain,
+  FileText,
+  UserPlus,
+  AlertCircle,
+  BarChart3,
+  GraduationCap,
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Boshqaruv paneli — EduLens" }] }),
-  component: () => (<ProtectedRoute><Dashboard /></ProtectedRoute>),
+  component: () => (
+    <ProtectedRoute>
+      <Dashboard />
+    </ProtectedRoute>
+  ),
 });
 
 interface SessionWithTest {
@@ -44,7 +57,11 @@ interface AdminStudent {
   class_letter: string | null;
   created_at: string | null;
 }
-interface CareerLite { id?: string; name_uz?: string; name?: string }
+interface CareerLite {
+  id?: string;
+  name_uz?: string;
+  name?: string;
+}
 
 function Dashboard() {
   const { role, loading } = useAuth();
@@ -57,7 +74,9 @@ function Dashboard() {
     );
   }
 
-  if (role === "admin") return <AdminDashboard />;
+  // Super admin o'z paneliga yo'naltiriladi; dashboard maslahatchiniki
+  if (role === "admin") return <Navigate to="/admin" />;
+  if (role === "counselor") return <AdminDashboard />;
   return <StudentDashboard />;
 }
 
@@ -69,7 +88,11 @@ function StudentDashboard() {
     queryKey: ["profile", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("full_name").eq("id", user!.id).maybeSingle();
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user!.id)
+        .maybeSingle();
       return data;
     },
   });
@@ -109,15 +132,16 @@ function StudentDashboard() {
   });
 
   const completedIds = new Set(
-    (sessions ?? []).filter((s) => s.status === "completed").map((s) => s.test_id)
+    (sessions ?? []).filter((s) => s.status === "completed").map((s) => s.test_id),
   );
   const inProgressSessions = (sessions ?? []).filter((s) => s.status === "in_progress");
   const completedCount = completedIds.size;
   // Faol testlar soni dinamik (Schulte nofaol qilingach 8 emas, 7) — qattiq kod o'rniga
   const totalTests = tests?.length ?? 0;
   const remainingCount = Math.max(0, totalTests - completedCount);
-  const completeness = sp?.profile_completeness
-    ?? (totalTests > 0 ? Math.min(100, Math.round((completedCount / totalTests) * 100)) : 0);
+  const completeness =
+    sp?.profile_completeness ??
+    (totalTests > 0 ? Math.min(100, Math.round((completedCount / totalTests) * 100)) : 0);
   const topCareer = (sp?.top_careers as CareerLite[] | null)?.[0];
 
   // Bajarilmagan testlar
@@ -127,7 +151,6 @@ function StudentDashboard() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="mx-auto max-w-4xl px-4 py-8">
-
         {/* Salom */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">
@@ -140,9 +163,24 @@ function StudentDashboard() {
 
         {/* Stat kartalar */}
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <StatCard label="Yechilgan testlar" value={`${completedCount}/${totalTests}`} icon={CheckCircle2} accent="success" />
-          <StatCard label="Davom etmoqda" value={inProgressSessions.length} icon={ClipboardList} accent="warning" />
-          <StatCard label="Portfolio to'liqligi" value={`${completeness}%`} icon={Sparkles} accent="primary" />
+          <StatCard
+            label="Yechilgan testlar"
+            value={`${completedCount}/${totalTests}`}
+            icon={CheckCircle2}
+            accent="success"
+          />
+          <StatCard
+            label="Davom etmoqda"
+            value={inProgressSessions.length}
+            icon={ClipboardList}
+            accent="warning"
+          />
+          <StatCard
+            label="Portfolio to'liqligi"
+            value={`${completeness}%`}
+            icon={Sparkles}
+            accent="primary"
+          />
         </div>
 
         {/* Progress bar */}
@@ -183,7 +221,9 @@ function StudentDashboard() {
                   <CardContent className="flex items-center justify-between p-4">
                     <p className="font-medium text-foreground">{s.tests?.name_uz ?? "Test"}</p>
                     <Button asChild size="sm">
-                      <Link to="/test/$id" params={{ id: s.test_id }}>Davom ettirish</Link>
+                      <Link to="/test/$id" params={{ id: s.test_id }}>
+                        Davom ettirish
+                      </Link>
                     </Button>
                   </CardContent>
                 </Card>
@@ -200,21 +240,31 @@ function StudentDashboard() {
                 <Brain className="h-5 w-5 text-primary" /> Keyingi testlar
               </h2>
               <Button asChild variant="ghost" size="sm">
-                <Link to="/my-tests">Hammasi <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                <Link to="/my-tests">
+                  Hammasi <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
               </Button>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
               {remainingTests.map((t) => (
-                <Card key={t.id} className="border-border/60 transition hover:border-primary/40" style={{ boxShadow: "var(--shadow-card)" }}>
+                <Card
+                  key={t.id}
+                  className="border-border/60 transition hover:border-primary/40"
+                  style={{ boxShadow: "var(--shadow-card)" }}
+                >
                   <CardContent className="p-5">
                     <p className="font-semibold text-foreground">{t.name_uz}</p>
-                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{t.description}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                      {t.description}
+                    </p>
                     <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
                       {t.duration_minutes && <span>⏱ {t.duration_minutes} daq</span>}
                       {t.question_count && <span>{t.question_count} ta savol</span>}
                     </div>
                     <Button asChild size="sm" className="mt-4 w-full">
-                      <Link to="/test/$id" params={{ id: t.id }}>Boshlash</Link>
+                      <Link to="/test/$id" params={{ id: t.id }}>
+                        Boshlash
+                      </Link>
                     </Button>
                   </CardContent>
                 </Card>
@@ -231,11 +281,15 @@ function StudentDashboard() {
                 <FileText className="h-8 w-8 text-primary" />
                 <div>
                   <p className="font-semibold text-foreground">Portfoliongizni ko'ring</p>
-                  <p className="text-sm text-muted-foreground">Psixologik profil, radar chart va kasb tavsiyalari</p>
+                  <p className="text-sm text-muted-foreground">
+                    Psixologik profil, radar chart va kasb tavsiyalari
+                  </p>
                 </div>
               </div>
               <Button asChild>
-                <Link to="/my-profile">Ochish <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+                <Link to="/my-profile">
+                  Ochish <ArrowRight className="ml-1.5 h-4 w-4" />
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -292,9 +346,10 @@ function AdminDashboard() {
   const totalStudents = students?.length ?? 0;
   const completedSessions = (sessions ?? []).filter((s) => s.status === "completed").length;
 
-  const avgCompleteness = spData && spData.length
-    ? Math.round(spData.reduce((a, p) => a + (p.profile_completeness ?? 0), 0) / spData.length)
-    : 0;
+  const avgCompleteness =
+    spData && spData.length
+      ? Math.round(spData.reduce((a, p) => a + (p.profile_completeness ?? 0), 0) / spData.length)
+      : 0;
 
   // O'quvchilar sinf bo'yicha guruhlash
   const classCounts: Record<string, number> = {};
@@ -307,7 +362,9 @@ function AdminDashboard() {
     .slice(0, 6);
 
   // Diqqat talab qiladigan o'quvchilar (portfolio 0%)
-  const completenessMap = Object.fromEntries((spData ?? []).map((p) => [p.student_id, p.profile_completeness ?? 0]));
+  const completenessMap = Object.fromEntries(
+    (spData ?? []).map((p) => [p.student_id, p.profile_completeness ?? 0]),
+  );
   const needsAttention = (students ?? [])
     .filter((s) => (completenessMap[s.id] ?? 0) === 0)
     .slice(0, 5);
@@ -319,7 +376,6 @@ function AdminDashboard() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="mx-auto max-w-6xl px-4 py-8">
-
         {/* Sarlavha */}
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -338,14 +394,23 @@ function AdminDashboard() {
         {/* Stat kartalar */}
         <div className="mb-6 grid gap-4 sm:grid-cols-4">
           <StatCard label="Jami o'quvchilar" value={totalStudents} icon={Users} accent="primary" />
-          <StatCard label="Yechilgan testlar" value={completedSessions} icon={CheckCircle2} accent="success" />
-          <StatCard label="O'rt. to'liqlik" value={`${avgCompleteness}%`} icon={TrendingUp} accent="warning" />
+          <StatCard
+            label="Yechilgan testlar"
+            value={completedSessions}
+            icon={CheckCircle2}
+            accent="success"
+          />
+          <StatCard
+            label="O'rt. to'liqlik"
+            value={`${avgCompleteness}%`}
+            icon={TrendingUp}
+            accent="warning"
+          />
           <StatCard label="Testlar soni" value={tests?.length ?? 0} icon={Brain} accent="primary" />
         </div>
 
         {/* Asosiy grid */}
         <div className="grid gap-5 lg:grid-cols-3">
-
           {/* Sinf bo'yicha taqsimot */}
           <Card className="border-border/60" style={{ boxShadow: "var(--shadow-card)" }}>
             <CardContent className="p-5">
@@ -354,16 +419,23 @@ function AdminDashboard() {
               </h3>
               {studentsLoading ? (
                 <div className="space-y-2">
-                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-8 w-full" />
+                  ))}
                 </div>
               ) : classGroups.length === 0 ? (
                 <p className="text-sm text-muted-foreground">O'quvchilar yo'q</p>
               ) : (
                 <div className="space-y-2">
                   {classGroups.map(([cls, count]) => (
-                    <div key={cls} className="flex items-center justify-between rounded-lg bg-muted/30 px-3 py-2">
+                    <div
+                      key={cls}
+                      className="flex items-center justify-between rounded-lg bg-muted/30 px-3 py-2"
+                    >
                       <span className="text-sm font-medium text-foreground">{cls}-sinf</span>
-                      <Badge variant="secondary" className="bg-primary/10 text-primary">{count} ta</Badge>
+                      <Badge variant="secondary" className="bg-primary/10 text-primary">
+                        {count} ta
+                      </Badge>
                     </div>
                   ))}
                   {Object.keys(classCounts).length > 6 && (
@@ -374,7 +446,9 @@ function AdminDashboard() {
                 </div>
               )}
               <Button asChild variant="outline" size="sm" className="mt-4 w-full">
-                <Link to="/students">Barchasi <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
+                <Link to="/students">
+                  Barchasi <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -385,18 +459,24 @@ function AdminDashboard() {
               <h3 className="mb-4 flex items-center gap-2 font-semibold text-foreground">
                 <AlertCircle className="h-4 w-4 text-destructive" /> E'tibor kerak
                 {needsAttention.length > 0 && (
-                  <Badge className="ml-auto bg-destructive/10 text-destructive">{needsAttention.length}</Badge>
+                  <Badge className="ml-auto bg-destructive/10 text-destructive">
+                    {needsAttention.length}
+                  </Badge>
                 )}
               </h3>
               {studentsLoading ? (
                 <div className="space-y-2">
-                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-10 w-full" />
+                  ))}
                 </div>
               ) : needsAttention.length === 0 ? (
                 <div className="flex flex-col items-center py-4 text-center">
                   <CheckCircle2 className="mb-2 h-8 w-8 text-emerald-500" />
                   <p className="text-sm font-medium text-foreground">Hammasi yaxshi!</p>
-                  <p className="text-xs text-muted-foreground">Barcha o'quvchilar testlarni boshlagan</p>
+                  <p className="text-xs text-muted-foreground">
+                    Barcha o'quvchilar testlarni boshlagan
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -411,9 +491,14 @@ function AdminDashboard() {
                         {(s.full_name ?? "?").charAt(0)}
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-foreground">{s.full_name ?? "Noma'lum"}</p>
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {s.full_name ?? "Noma'lum"}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          {s.class_number ? `${s.class_number}-${s.class_letter ?? ""} sinf` : "Sinf yo'q"} • 0% test
+                          {s.class_number
+                            ? `${s.class_number}-${s.class_letter ?? ""} sinf`
+                            : "Sinf yo'q"}{" "}
+                          • 0% test
                         </p>
                       </div>
                     </Link>
@@ -455,10 +540,34 @@ function AdminDashboard() {
         {/* Quyi qator: Tezkor havolalar */}
         <div className="mt-5 grid gap-3 sm:grid-cols-4">
           {[
-            { to: "/students" as const, icon: Users, label: "O'quvchilar ro'yxati", color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
-            { to: "/students-manage" as const, icon: UserPlus, label: "O'quvchi qo'shish", color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
-            { to: "/analytics" as const, icon: BarChart3, label: "Tahlil va statistika", color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
-            { to: "/my-tests" as const, icon: Brain, label: "Testlar", color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
+            {
+              to: "/students" as const,
+              icon: Users,
+              label: "O'quvchilar ro'yxati",
+              color: "text-indigo-600",
+              bg: "bg-indigo-50 dark:bg-indigo-950/30",
+            },
+            {
+              to: "/students-manage" as const,
+              icon: UserPlus,
+              label: "O'quvchi qo'shish",
+              color: "text-emerald-600",
+              bg: "bg-emerald-50 dark:bg-emerald-950/30",
+            },
+            {
+              to: "/analytics" as const,
+              icon: BarChart3,
+              label: "Tahlil va statistika",
+              color: "text-amber-600",
+              bg: "bg-amber-50 dark:bg-amber-950/30",
+            },
+            {
+              to: "/my-tests" as const,
+              icon: Brain,
+              label: "Testlar",
+              color: "text-purple-600",
+              bg: "bg-purple-50 dark:bg-purple-950/30",
+            },
           ].map((item) => (
             <Link
               key={item.to}
@@ -471,7 +580,6 @@ function AdminDashboard() {
             </Link>
           ))}
         </div>
-
       </main>
     </div>
   );

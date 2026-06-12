@@ -22,7 +22,9 @@ export function ProtectedRoute({ children, requiredRoles }: Props) {
   if (loading || !user || role === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-pulse"><Logo /></div>
+        <div className="animate-pulse">
+          <Logo />
+        </div>
       </div>
     );
   }

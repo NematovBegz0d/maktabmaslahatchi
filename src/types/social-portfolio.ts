@@ -1,19 +1,8 @@
 // ─── Ijtimoiy Portfolio tiplari ───────────────────────────────────────────────
 
-export type AchievementCategory =
-  | "academic"
-  | "sport"
-  | "art"
-  | "science"
-  | "social"
-  | "other";
+export type AchievementCategory = "academic" | "sport" | "art" | "science" | "social" | "other";
 
-export type AchievementLevel =
-  | "school"
-  | "district"
-  | "region"
-  | "republic"
-  | "international";
+export type AchievementLevel = "school" | "district" | "region" | "republic" | "international";
 
 export type AchievementResult = "winner" | "prize" | "participant";
 
@@ -82,50 +71,42 @@ export const CATEGORY_MAP: Record<
   },
 };
 
-export const LEVEL_MAP: Record<
-  AchievementLevel,
-  { label: string; weight: number; badge: string }
-> = {
-  school: {
-    label: "Maktab",
-    weight: 1,
-    badge: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-  },
-  district: {
-    label: "Tuman/Shahar",
-    weight: 2,
-    badge: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300",
-  },
-  region: {
-    label: "Viloyat",
-    weight: 3,
-    badge: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
-  },
-  republic: {
-    label: "Respublika",
-    weight: 4,
-    badge: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
-  },
-  international: {
-    label: "Xalqaro",
-    weight: 5,
-    badge: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
-  },
-};
+export const LEVEL_MAP: Record<AchievementLevel, { label: string; weight: number; badge: string }> =
+  {
+    school: {
+      label: "Maktab",
+      weight: 1,
+      badge: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+    },
+    district: {
+      label: "Tuman/Shahar",
+      weight: 2,
+      badge: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300",
+    },
+    region: {
+      label: "Viloyat",
+      weight: 3,
+      badge: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
+    },
+    republic: {
+      label: "Respublika",
+      weight: 4,
+      badge: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
+    },
+    international: {
+      label: "Xalqaro",
+      weight: 5,
+      badge: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
+    },
+  };
 
-export const RESULT_MAP: Record<
-  AchievementResult,
-  { label: string; icon: string }
-> = {
+export const RESULT_MAP: Record<AchievementResult, { label: string; icon: string }> = {
   winner: { label: "G'olib", icon: "🥇" },
   prize: { label: "Sovrindor", icon: "🏆" },
   participant: { label: "Ishtirokchi", icon: "🎖️" },
 };
 
-export const ENROLLMENT_STATUS_MAP: Record<
-  EnrollmentStatus,
-  { label: string; badge: string }
-> = {
+export const ENROLLMENT_STATUS_MAP: Record<EnrollmentStatus, { label: string; badge: string }> = {
   active: {
     label: "Faol",
     badge: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
@@ -152,7 +133,7 @@ export function computeEngagement(args: {
   const clubPoints = Math.min(args.clubsCount * 10, 30);
   const achievementPoints = Math.min(
     args.achievements.reduce((sum, a) => sum + (LEVEL_MAP[a.level]?.weight ?? 1) * 4, 0),
-    40
+    40,
   );
   const enrollmentPoints = Math.min(args.activeEnrollments * 10, 30);
   const score = Math.min(clubPoints + achievementPoints + enrollmentPoints, 100);

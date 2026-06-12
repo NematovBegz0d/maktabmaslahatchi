@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TestsManageRouteImport } from './routes/tests-manage'
+import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as StudentsManageRouteImport } from './routes/students-manage'
 import { Route as SocialPortfolioRouteImport } from './routes/social-portfolio'
 import { Route as MyTestsRouteImport } from './routes/my-tests'
@@ -23,14 +24,30 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentsIndexRouteImport } from './routes/students.index'
+import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as ClubsIndexRouteImport } from './routes/clubs.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TestIdRouteImport } from './routes/test.$id'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
+import { Route as NewsIdRouteImport } from './routes/news.$id'
 import { Route as ClubsIdRouteImport } from './routes/clubs.$id'
+import { Route as AdminTasksRouteImport } from './routes/admin.tasks'
+import { Route as AdminSchoolsRouteImport } from './routes/admin.schools'
+import { Route as AdminRatingRouteImport } from './routes/admin.rating'
+import { Route as AdminNewsRouteImport } from './routes/admin.news'
+import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
+import { Route as AdminCounselorsRouteImport } from './routes/admin.counselors'
+import { Route as AdminCenterClubsRouteImport } from './routes/admin.center-clubs'
+import { Route as AdminActivityRouteImport } from './routes/admin.activity'
 
 const TestsManageRoute = TestsManageRouteImport.update({
   id: '/tests-manage',
   path: '/tests-manage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudentsManageRoute = StudentsManageRouteImport.update({
@@ -98,9 +115,19 @@ const StudentsIndexRoute = StudentsIndexRouteImport.update({
   path: '/students/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NewsIndexRoute = NewsIndexRouteImport.update({
+  id: '/news/',
+  path: '/news/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClubsIndexRoute = ClubsIndexRouteImport.update({
   id: '/clubs/',
   path: '/clubs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestIdRoute = TestIdRouteImport.update({
@@ -113,9 +140,54 @@ const StudentsIdRoute = StudentsIdRouteImport.update({
   path: '/students/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NewsIdRoute = NewsIdRouteImport.update({
+  id: '/news/$id',
+  path: '/news/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClubsIdRoute = ClubsIdRouteImport.update({
   id: '/clubs/$id',
   path: '/clubs/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTasksRoute = AdminTasksRouteImport.update({
+  id: '/admin/tasks',
+  path: '/admin/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSchoolsRoute = AdminSchoolsRouteImport.update({
+  id: '/admin/schools',
+  path: '/admin/schools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRatingRoute = AdminRatingRouteImport.update({
+  id: '/admin/rating',
+  path: '/admin/rating',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminNewsRoute = AdminNewsRouteImport.update({
+  id: '/admin/news',
+  path: '/admin/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMessagesRoute = AdminMessagesRouteImport.update({
+  id: '/admin/messages',
+  path: '/admin/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCounselorsRoute = AdminCounselorsRouteImport.update({
+  id: '/admin/counselors',
+  path: '/admin/counselors',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCenterClubsRoute = AdminCenterClubsRouteImport.update({
+  id: '/admin/center-clubs',
+  path: '/admin/center-clubs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminActivityRoute = AdminActivityRouteImport.update({
+  id: '/admin/activity',
+  path: '/admin/activity',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -132,11 +204,23 @@ export interface FileRoutesByFullPath {
   '/my-tests': typeof MyTestsRoute
   '/social-portfolio': typeof SocialPortfolioRoute
   '/students-manage': typeof StudentsManageRoute
+  '/tasks': typeof TasksRoute
   '/tests-manage': typeof TestsManageRoute
+  '/admin/activity': typeof AdminActivityRoute
+  '/admin/center-clubs': typeof AdminCenterClubsRoute
+  '/admin/counselors': typeof AdminCounselorsRoute
+  '/admin/messages': typeof AdminMessagesRoute
+  '/admin/news': typeof AdminNewsRoute
+  '/admin/rating': typeof AdminRatingRoute
+  '/admin/schools': typeof AdminSchoolsRoute
+  '/admin/tasks': typeof AdminTasksRoute
   '/clubs/$id': typeof ClubsIdRoute
+  '/news/$id': typeof NewsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/test/$id': typeof TestIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/clubs/': typeof ClubsIndexRoute
+  '/news/': typeof NewsIndexRoute
   '/students/': typeof StudentsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -152,11 +236,23 @@ export interface FileRoutesByTo {
   '/my-tests': typeof MyTestsRoute
   '/social-portfolio': typeof SocialPortfolioRoute
   '/students-manage': typeof StudentsManageRoute
+  '/tasks': typeof TasksRoute
   '/tests-manage': typeof TestsManageRoute
+  '/admin/activity': typeof AdminActivityRoute
+  '/admin/center-clubs': typeof AdminCenterClubsRoute
+  '/admin/counselors': typeof AdminCounselorsRoute
+  '/admin/messages': typeof AdminMessagesRoute
+  '/admin/news': typeof AdminNewsRoute
+  '/admin/rating': typeof AdminRatingRoute
+  '/admin/schools': typeof AdminSchoolsRoute
+  '/admin/tasks': typeof AdminTasksRoute
   '/clubs/$id': typeof ClubsIdRoute
+  '/news/$id': typeof NewsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/test/$id': typeof TestIdRoute
+  '/admin': typeof AdminIndexRoute
   '/clubs': typeof ClubsIndexRoute
+  '/news': typeof NewsIndexRoute
   '/students': typeof StudentsIndexRoute
 }
 export interface FileRoutesById {
@@ -173,11 +269,23 @@ export interface FileRoutesById {
   '/my-tests': typeof MyTestsRoute
   '/social-portfolio': typeof SocialPortfolioRoute
   '/students-manage': typeof StudentsManageRoute
+  '/tasks': typeof TasksRoute
   '/tests-manage': typeof TestsManageRoute
+  '/admin/activity': typeof AdminActivityRoute
+  '/admin/center-clubs': typeof AdminCenterClubsRoute
+  '/admin/counselors': typeof AdminCounselorsRoute
+  '/admin/messages': typeof AdminMessagesRoute
+  '/admin/news': typeof AdminNewsRoute
+  '/admin/rating': typeof AdminRatingRoute
+  '/admin/schools': typeof AdminSchoolsRoute
+  '/admin/tasks': typeof AdminTasksRoute
   '/clubs/$id': typeof ClubsIdRoute
+  '/news/$id': typeof NewsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/test/$id': typeof TestIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/clubs/': typeof ClubsIndexRoute
+  '/news/': typeof NewsIndexRoute
   '/students/': typeof StudentsIndexRoute
 }
 export interface FileRouteTypes {
@@ -195,11 +303,23 @@ export interface FileRouteTypes {
     | '/my-tests'
     | '/social-portfolio'
     | '/students-manage'
+    | '/tasks'
     | '/tests-manage'
+    | '/admin/activity'
+    | '/admin/center-clubs'
+    | '/admin/counselors'
+    | '/admin/messages'
+    | '/admin/news'
+    | '/admin/rating'
+    | '/admin/schools'
+    | '/admin/tasks'
     | '/clubs/$id'
+    | '/news/$id'
     | '/students/$id'
     | '/test/$id'
+    | '/admin/'
     | '/clubs/'
+    | '/news/'
     | '/students/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -215,11 +335,23 @@ export interface FileRouteTypes {
     | '/my-tests'
     | '/social-portfolio'
     | '/students-manage'
+    | '/tasks'
     | '/tests-manage'
+    | '/admin/activity'
+    | '/admin/center-clubs'
+    | '/admin/counselors'
+    | '/admin/messages'
+    | '/admin/news'
+    | '/admin/rating'
+    | '/admin/schools'
+    | '/admin/tasks'
     | '/clubs/$id'
+    | '/news/$id'
     | '/students/$id'
     | '/test/$id'
+    | '/admin'
     | '/clubs'
+    | '/news'
     | '/students'
   id:
     | '__root__'
@@ -235,11 +367,23 @@ export interface FileRouteTypes {
     | '/my-tests'
     | '/social-portfolio'
     | '/students-manage'
+    | '/tasks'
     | '/tests-manage'
+    | '/admin/activity'
+    | '/admin/center-clubs'
+    | '/admin/counselors'
+    | '/admin/messages'
+    | '/admin/news'
+    | '/admin/rating'
+    | '/admin/schools'
+    | '/admin/tasks'
     | '/clubs/$id'
+    | '/news/$id'
     | '/students/$id'
     | '/test/$id'
+    | '/admin/'
     | '/clubs/'
+    | '/news/'
     | '/students/'
   fileRoutesById: FileRoutesById
 }
@@ -256,11 +400,23 @@ export interface RootRouteChildren {
   MyTestsRoute: typeof MyTestsRoute
   SocialPortfolioRoute: typeof SocialPortfolioRoute
   StudentsManageRoute: typeof StudentsManageRoute
+  TasksRoute: typeof TasksRoute
   TestsManageRoute: typeof TestsManageRoute
+  AdminActivityRoute: typeof AdminActivityRoute
+  AdminCenterClubsRoute: typeof AdminCenterClubsRoute
+  AdminCounselorsRoute: typeof AdminCounselorsRoute
+  AdminMessagesRoute: typeof AdminMessagesRoute
+  AdminNewsRoute: typeof AdminNewsRoute
+  AdminRatingRoute: typeof AdminRatingRoute
+  AdminSchoolsRoute: typeof AdminSchoolsRoute
+  AdminTasksRoute: typeof AdminTasksRoute
   ClubsIdRoute: typeof ClubsIdRoute
+  NewsIdRoute: typeof NewsIdRoute
   StudentsIdRoute: typeof StudentsIdRoute
   TestIdRoute: typeof TestIdRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   ClubsIndexRoute: typeof ClubsIndexRoute
+  NewsIndexRoute: typeof NewsIndexRoute
   StudentsIndexRoute: typeof StudentsIndexRoute
 }
 
@@ -271,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/tests-manage'
       fullPath: '/tests-manage'
       preLoaderRoute: typeof TestsManageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/students-manage': {
@@ -364,11 +527,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/news/': {
+      id: '/news/'
+      path: '/news'
+      fullPath: '/news/'
+      preLoaderRoute: typeof NewsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/clubs/': {
       id: '/clubs/'
       path: '/clubs'
       fullPath: '/clubs/'
       preLoaderRoute: typeof ClubsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/$id': {
@@ -385,11 +562,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/news/$id': {
+      id: '/news/$id'
+      path: '/news/$id'
+      fullPath: '/news/$id'
+      preLoaderRoute: typeof NewsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/clubs/$id': {
       id: '/clubs/$id'
       path: '/clubs/$id'
       fullPath: '/clubs/$id'
       preLoaderRoute: typeof ClubsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/tasks': {
+      id: '/admin/tasks'
+      path: '/admin/tasks'
+      fullPath: '/admin/tasks'
+      preLoaderRoute: typeof AdminTasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/schools': {
+      id: '/admin/schools'
+      path: '/admin/schools'
+      fullPath: '/admin/schools'
+      preLoaderRoute: typeof AdminSchoolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/rating': {
+      id: '/admin/rating'
+      path: '/admin/rating'
+      fullPath: '/admin/rating'
+      preLoaderRoute: typeof AdminRatingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/news': {
+      id: '/admin/news'
+      path: '/admin/news'
+      fullPath: '/admin/news'
+      preLoaderRoute: typeof AdminNewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/messages': {
+      id: '/admin/messages'
+      path: '/admin/messages'
+      fullPath: '/admin/messages'
+      preLoaderRoute: typeof AdminMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/counselors': {
+      id: '/admin/counselors'
+      path: '/admin/counselors'
+      fullPath: '/admin/counselors'
+      preLoaderRoute: typeof AdminCounselorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/center-clubs': {
+      id: '/admin/center-clubs'
+      path: '/admin/center-clubs'
+      fullPath: '/admin/center-clubs'
+      preLoaderRoute: typeof AdminCenterClubsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/activity': {
+      id: '/admin/activity'
+      path: '/admin/activity'
+      fullPath: '/admin/activity'
+      preLoaderRoute: typeof AdminActivityRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -408,11 +648,23 @@ const rootRouteChildren: RootRouteChildren = {
   MyTestsRoute: MyTestsRoute,
   SocialPortfolioRoute: SocialPortfolioRoute,
   StudentsManageRoute: StudentsManageRoute,
+  TasksRoute: TasksRoute,
   TestsManageRoute: TestsManageRoute,
+  AdminActivityRoute: AdminActivityRoute,
+  AdminCenterClubsRoute: AdminCenterClubsRoute,
+  AdminCounselorsRoute: AdminCounselorsRoute,
+  AdminMessagesRoute: AdminMessagesRoute,
+  AdminNewsRoute: AdminNewsRoute,
+  AdminRatingRoute: AdminRatingRoute,
+  AdminSchoolsRoute: AdminSchoolsRoute,
+  AdminTasksRoute: AdminTasksRoute,
   ClubsIdRoute: ClubsIdRoute,
+  NewsIdRoute: NewsIdRoute,
   StudentsIdRoute: StudentsIdRoute,
   TestIdRoute: TestIdRoute,
+  AdminIndexRoute: AdminIndexRoute,
   ClubsIndexRoute: ClubsIndexRoute,
+  NewsIndexRoute: NewsIndexRoute,
   StudentsIndexRoute: StudentsIndexRoute,
 }
 export const routeTree = rootRouteImport

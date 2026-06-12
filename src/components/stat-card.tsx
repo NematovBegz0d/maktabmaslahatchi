@@ -1,12 +1,23 @@
 import { Card, CardContent } from "@/components/ui/card";
 import type { LucideIcon } from "lucide-react";
 
-export function StatCard({ label, value, icon: Icon, accent }: { label: string; value: string | number; icon: LucideIcon; accent?: "primary" | "secondary" | "success" | "warning" }) {
+export function StatCard({
+  label,
+  value,
+  icon: Icon,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  icon: LucideIcon;
+  accent?: "primary" | "secondary" | "success" | "warning" | "destructive";
+}) {
   const colorMap = {
     primary: "bg-primary/10 text-primary",
     secondary: "bg-secondary/10 text-secondary",
     success: "bg-success/10 text-success",
     warning: "bg-warning/10 text-warning",
+    destructive: "bg-destructive/10 text-destructive",
   } as const;
   const cls = colorMap[accent ?? "primary"];
   return (

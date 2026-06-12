@@ -4,9 +4,15 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 const store: Record<string, string> = {};
 const localStorageMock = {
   getItem: (key: string) => store[key] ?? null,
-  setItem: (key: string, val: string) => { store[key] = val; },
-  removeItem: (key: string) => { delete store[key]; },
-  clear: () => { Object.keys(store).forEach((k) => delete store[k]); },
+  setItem: (key: string, val: string) => {
+    store[key] = val;
+  },
+  removeItem: (key: string) => {
+    delete store[key];
+  },
+  clear: () => {
+    Object.keys(store).forEach((k) => delete store[k]);
+  },
 };
 Object.defineProperty(globalThis, "localStorage", { value: localStorageMock });
 

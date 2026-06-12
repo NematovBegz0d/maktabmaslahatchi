@@ -7,14 +7,26 @@ import { AISummary } from "@/components/ai-summary";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import {
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
 } from "recharts";
 import { Printer, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/my-report")({
   head: () => ({ meta: [{ title: "Portfolio hisoboti — EduLens" }] }),
-  component: () => (<ProtectedRoute><MyReport /></ProtectedRoute>),
+  component: () => (
+    <ProtectedRoute>
+      <MyReport />
+    </ProtectedRoute>
+  ),
 });
 
 const HOLLAND_INFO: Record<string, { label: string; desc: string }> = {
@@ -27,10 +39,22 @@ const HOLLAND_INFO: Record<string, { label: string; desc: string }> = {
 };
 
 const TEMP_INFO: Record<string, { desc: string; strong: string }> = {
-  Sangvinik: { desc: "Faol, ijtimoiy, xushchaqchaq", strong: "Muloqotchanlik, moslashuvchanlik, optimizm" },
-  Xolerik: { desc: "Energik, qizg'in, tashabbuskor", strong: "Liderlik, qat'iyatlilik, tez qaror qilish" },
-  Flegmatik: { desc: "Xotirjam, barqaror, ishonchli", strong: "Chidamlilik, diqqatlilik, ishonchlilik" },
-  Melanxolik: { desc: "Sezgir, chuqur fikrlovchi", strong: "Ijodkorlik, tahliliy fikrlash, sezgirlik" },
+  Sangvinik: {
+    desc: "Faol, ijtimoiy, xushchaqchaq",
+    strong: "Muloqotchanlik, moslashuvchanlik, optimizm",
+  },
+  Xolerik: {
+    desc: "Energik, qizg'in, tashabbuskor",
+    strong: "Liderlik, qat'iyatlilik, tez qaror qilish",
+  },
+  Flegmatik: {
+    desc: "Xotirjam, barqaror, ishonchli",
+    strong: "Chidamlilik, diqqatlilik, ishonchlilik",
+  },
+  Melanxolik: {
+    desc: "Sezgir, chuqur fikrlovchi",
+    strong: "Ijodkorlik, tahliliy fikrlash, sezgirlik",
+  },
 };
 
 function iqLabel(score: number) {
@@ -41,13 +65,30 @@ function iqLabel(score: number) {
   return "Rivojlantirilishi kerak";
 }
 
-interface RadarItem { skill: string; value: number }
-interface IqItem { type: string; score: number }
-interface TopCareer { id: string; name_uz: string; description: string | null; required_skills: string[]; salary_range: string | null; universities?: { name: string; city?: string }[] }
+interface RadarItem {
+  skill: string;
+  value: number;
+}
+interface IqItem {
+  type: string;
+  score: number;
+}
+interface TopCareer {
+  id: string;
+  name_uz: string;
+  description: string | null;
+  required_skills: string[];
+  salary_range: string | null;
+  universities?: { name: string; city?: string }[];
+}
 interface ReportResult {
-  id: string; holland_code: string | null; personality_type: string | null;
-  raw_scores: Record<string, number> | null; scaled_scores: Record<string, number> | null;
-  created_at: string; tests: { name_uz: string | null; test_type?: string | null } | null;
+  id: string;
+  holland_code: string | null;
+  personality_type: string | null;
+  raw_scores: Record<string, number> | null;
+  scaled_scores: Record<string, number> | null;
+  created_at: string;
+  tests: { name_uz: string | null; test_type?: string | null } | null;
 }
 type SchoolRef = { name?: string; region?: string } | null;
 
@@ -86,7 +127,9 @@ function MyReport() {
     queryFn: async () => {
       const { data } = await supabase
         .from("test_results")
-        .select("id, holland_code, personality_type, raw_scores, scaled_scores, created_at, tests(name_uz, test_type)")
+        .select(
+          "id, holland_code, personality_type, raw_scores, scaled_scores, created_at, tests(name_uz, test_type)",
+        )
         .eq("student_id", user!.id)
         .order("created_at", { ascending: false });
       return (data ?? []) as ReportResult[];
@@ -119,10 +162,14 @@ function MyReport() {
   const strengths = sorted.slice(0, 3).filter((x) => x.value >= 50);
 
   const universities = Array.from(
-    new Map(topCareers.flatMap((c) => c.universities ?? []).map((u) => [u.name, u])).values()
+    new Map(topCareers.flatMap((c) => c.universities ?? []).map((u) => [u.name, u])).values(),
   ).slice(0, 4) as { name: string; city?: string }[];
 
-  const today = new Date().toLocaleDateString("uz-UZ", { day: "2-digit", month: "long", year: "numeric" });
+  const today = new Date().toLocaleDateString("uz-UZ", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -139,16 +186,19 @@ function MyReport() {
       {/* Boshqaruv (chop etilmaydi) */}
       <div className="no-print sticky top-0 z-10 flex items-center justify-between border-b bg-white px-4 py-3 shadow-sm">
         <Button asChild variant="ghost" size="sm">
-          <Link to="/my-profile"><ArrowLeft className="mr-1.5 h-4 w-4" />Portfolioga qaytish</Link>
+          <Link to="/my-profile">
+            <ArrowLeft className="mr-1.5 h-4 w-4" />
+            Portfolioga qaytish
+          </Link>
         </Button>
         <Button size="sm" onClick={() => window.print()}>
-          <Printer className="mr-1.5 h-4 w-4" />PDF / Chop etish
+          <Printer className="mr-1.5 h-4 w-4" />
+          PDF / Chop etish
         </Button>
       </div>
 
       {/* Hisobot varag'i */}
       <div className="report-sheet mx-auto my-6 max-w-3xl rounded-xl bg-white shadow-xl">
-
         {/* ── SARLAVHA ── */}
         <div className="rounded-t-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6 text-white">
           <div className="flex items-center justify-between">
@@ -161,25 +211,36 @@ function MyReport() {
         </div>
 
         <div className="p-8">
-
           {/* ── O'QUVCHI MA'LUMOTI ── */}
           <div className="mb-6 flex items-start gap-4 rounded-xl bg-slate-50 p-5">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-2xl font-bold text-indigo-600">
               {(profile?.full_name ?? "?").charAt(0).toUpperCase()}
             </div>
             <div className="flex-1">
-              <h1 className="text-xl font-bold text-slate-900">{profile?.full_name ?? "O'quvchi"}</h1>
+              <h1 className="text-xl font-bold text-slate-900">
+                {profile?.full_name ?? "O'quvchi"}
+              </h1>
               <p className="text-sm text-slate-500">
-                {profile?.class_number ? `${profile.class_number}-${profile.class_letter ?? ""} sinf` : ""}
-                {(profile?.schools as SchoolRef)?.name ? ` • ${(profile!.schools as SchoolRef)!.name}` : ""}
-                {(profile?.schools as SchoolRef)?.region ? `, ${(profile!.schools as SchoolRef)!.region}` : ""}
+                {profile?.class_number
+                  ? `${profile.class_number}-${profile.class_letter ?? ""} sinf`
+                  : ""}
+                {(profile?.schools as SchoolRef)?.name
+                  ? ` • ${(profile!.schools as SchoolRef)!.name}`
+                  : ""}
+                {(profile?.schools as SchoolRef)?.region
+                  ? `, ${(profile!.schools as SchoolRef)!.region}`
+                  : ""}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
-                {hollandCode && hollandCode.split("").map((ch: string) => (
-                  <span key={ch} className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-600">
-                    {ch} – {HOLLAND_INFO[ch]?.label}
-                  </span>
-                ))}
+                {hollandCode &&
+                  hollandCode.split("").map((ch: string) => (
+                    <span
+                      key={ch}
+                      className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-600"
+                    >
+                      {ch} – {HOLLAND_INFO[ch]?.label}
+                    </span>
+                  ))}
                 {temperament && (
                   <span className="rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-semibold text-purple-600">
                     {temperament}
@@ -203,7 +264,13 @@ function MyReport() {
                       <PolarGrid stroke="#e2e8f0" />
                       <PolarAngleAxis dataKey="skill" tick={{ fontSize: 10 }} />
                       <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
-                      <Radar dataKey="value" stroke="#4F46E5" fill="#4F46E5" fillOpacity={0.35} isAnimationActive={false} />
+                      <Radar
+                        dataKey="value"
+                        stroke="#4F46E5"
+                        fill="#4F46E5"
+                        fillOpacity={0.35}
+                        isAnimationActive={false}
+                      />
                     </RadarChart>
                   </ResponsiveContainer>
                 </div>
@@ -211,21 +278,31 @@ function MyReport() {
 
               {iqData.length > 0 && (
                 <div>
-                  <h3 className="mb-1 text-sm font-semibold text-slate-700">Intellekt (taxminiy)</h3>
-                  <p className="mb-2 text-[10px] text-amber-600">Rasmiy IQ testi emas — taxminiy nisbiy ball.</p>
+                  <h3 className="mb-1 text-sm font-semibold text-slate-700">
+                    Intellekt (taxminiy)
+                  </h3>
+                  <p className="mb-2 text-[10px] text-amber-600">
+                    Rasmiy IQ testi emas — taxminiy nisbiy ball.
+                  </p>
                   <div className="h-60">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={iqData}>
                         <XAxis dataKey="type" tick={{ fontSize: 9 }} />
                         <YAxis domain={[60, 140]} tick={{ fontSize: 9 }} />
-                        <Bar dataKey="score" radius={[6, 6, 0, 0]} fill="#7C3AED" isAnimationActive={false} />
+                        <Bar
+                          dataKey="score"
+                          radius={[6, 6, 0, 0]}
+                          fill="#7C3AED"
+                          isAnimationActive={false}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                   <div className="mt-1 space-y-0.5">
                     {iqData.map((item) => (
                       <p key={item.type} className="text-xs text-slate-500">
-                        <span className="font-semibold text-slate-700">{item.type}:</span> {item.score} — {iqLabel(item.score)}
+                        <span className="font-semibold text-slate-700">{item.type}:</span>{" "}
+                        {item.score} — {iqLabel(item.score)}
                       </p>
                     ))}
                   </div>
@@ -243,7 +320,8 @@ function MyReport() {
                   <div key={s.name} className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-slate-700">{s.name}</span>
                     <span className="text-slate-500">
-                      {s.correct}/{s.total} • {s.percent}% — baho: <span className="font-bold text-slate-700">{s.grade}</span>
+                      {s.correct}/{s.total} • {s.percent}% — baho:{" "}
+                      <span className="font-bold text-slate-700">{s.grade}</span>
                     </span>
                   </div>
                 ))}
@@ -258,11 +336,14 @@ function MyReport() {
               <div className="grid gap-4 sm:grid-cols-2">
                 {hollandCode && (
                   <div>
-                    <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Holland kasb yo'nalishi</p>
+                    <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Holland kasb yo'nalishi
+                    </p>
                     <div className="space-y-1">
                       {hollandCode.split("").map((ch: string) => (
                         <p key={ch} className="text-xs text-slate-700">
-                          <span className="font-bold text-indigo-600">{ch}</span> — {HOLLAND_INFO[ch]?.label}: {HOLLAND_INFO[ch]?.desc}
+                          <span className="font-bold text-indigo-600">{ch}</span> —{" "}
+                          {HOLLAND_INFO[ch]?.label}: {HOLLAND_INFO[ch]?.desc}
                         </p>
                       ))}
                     </div>
@@ -270,10 +351,14 @@ function MyReport() {
                 )}
                 {temperament && TEMP_INFO[temperament] && (
                   <div>
-                    <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Temperament</p>
+                    <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Temperament
+                    </p>
                     <p className="text-sm font-semibold text-slate-800">{temperament}</p>
                     <p className="text-xs text-slate-500">{TEMP_INFO[temperament].desc}</p>
-                    <p className="mt-1 text-xs text-slate-600">Kuchli tomonlar: {TEMP_INFO[temperament].strong}</p>
+                    <p className="mt-1 text-xs text-slate-600">
+                      Kuchli tomonlar: {TEMP_INFO[temperament].strong}
+                    </p>
                   </div>
                 )}
               </div>
@@ -290,7 +375,10 @@ function MyReport() {
                     <span className="text-xs text-green-700">✓</span>
                     <span className="text-xs font-medium text-slate-700">{s.skill}</span>
                     <div className="flex-1 h-1.5 rounded-full bg-green-200 overflow-hidden">
-                      <div className="h-full rounded-full bg-green-500" style={{ width: `${s.value}%` }} />
+                      <div
+                        className="h-full rounded-full bg-green-500"
+                        style={{ width: `${s.value}%` }}
+                      />
                     </div>
                     <span className="text-xs font-semibold text-slate-600">{s.value}/100</span>
                   </div>
@@ -309,17 +397,23 @@ function MyReport() {
                   return (
                     <div key={r.id} className="rounded-lg border border-slate-200 p-3">
                       <div className="flex items-center justify-between">
-                        <p className="text-sm font-semibold text-slate-800">{r.tests?.name_uz ?? "Test"}</p>
+                        <p className="text-sm font-semibold text-slate-800">
+                          {r.tests?.name_uz ?? "Test"}
+                        </p>
                         <p className="text-xs text-slate-400">
                           {new Date(r.created_at).toLocaleDateString("uz-UZ")}
                         </p>
                       </div>
                       <div className="mt-1 flex flex-wrap gap-1.5">
                         {r.holland_code && (
-                          <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-600">Holland: {r.holland_code}</span>
+                          <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-600">
+                            Holland: {r.holland_code}
+                          </span>
                         )}
                         {r.personality_type && (
-                          <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-semibold text-purple-600">{r.personality_type}</span>
+                          <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-semibold text-purple-600">
+                            {r.personality_type}
+                          </span>
                         )}
                       </div>
                       {scores && Object.keys(scores).length > 0 && (
@@ -344,12 +438,19 @@ function MyReport() {
               <h3 className="mb-3 text-sm font-semibold text-slate-700">Tavsiya etilgan kasblar</h3>
               <div className="space-y-2">
                 {topCareers.slice(0, 5).map((c, i) => (
-                  <div key={c.id} className="flex items-start gap-3 rounded-lg border border-slate-100 p-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-bold text-indigo-600">{i + 1}</span>
+                  <div
+                    key={c.id}
+                    className="flex items-start gap-3 rounded-lg border border-slate-100 p-3"
+                  >
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-bold text-indigo-600">
+                      {i + 1}
+                    </span>
                     <div>
                       <p className="text-sm font-semibold text-slate-800">{c.name_uz}</p>
                       {c.description && <p className="text-xs text-slate-500">{c.description}</p>}
-                      {c.salary_range && <p className="mt-0.5 text-xs text-slate-400">Maosh: {c.salary_range}</p>}
+                      {c.salary_range && (
+                        <p className="mt-0.5 text-xs text-slate-400">Maosh: {c.salary_range}</p>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -360,11 +461,18 @@ function MyReport() {
           {/* ── UNIVERSITETLAR ── */}
           {universities.length > 0 && (
             <div className="mb-6">
-              <h3 className="mb-3 text-sm font-semibold text-slate-700">Tavsiya etilgan oliy ta'lim muassasalari</h3>
+              <h3 className="mb-3 text-sm font-semibold text-slate-700">
+                Tavsiya etilgan oliy ta'lim muassasalari
+              </h3>
               <div className="grid grid-cols-2 gap-2">
                 {universities.map((u, i) => (
-                  <div key={u.name} className="flex items-center gap-2 rounded-lg border border-slate-100 p-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-purple-50 text-xs font-bold text-purple-600">{i + 1}</span>
+                  <div
+                    key={u.name}
+                    className="flex items-center gap-2 rounded-lg border border-slate-100 p-3"
+                  >
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-purple-50 text-xs font-bold text-purple-600">
+                      {i + 1}
+                    </span>
                     <div>
                       <p className="text-xs font-semibold text-slate-800">{u.name}</p>
                       {u.city && <p className="text-xs text-slate-400">📍 {u.city}</p>}
@@ -392,8 +500,9 @@ function MyReport() {
 
           {/* Izoh */}
           <p className="mt-6 border-t pt-4 text-center text-[11px] leading-relaxed text-slate-400">
-            Ushbu portfolio EduLens platformasi tomonidan ilmiy psixologik testlar asosida shakllantirildi.
-            Natijalar maslahat xarakteriga ega — yakuniy qaror pedagog-psixolog tasdig'i bilan qabul qilinadi.
+            Ushbu portfolio EduLens platformasi tomonidan ilmiy psixologik testlar asosida
+            shakllantirildi. Natijalar maslahat xarakteriga ega — yakuniy qaror pedagog-psixolog
+            tasdig'i bilan qabul qilinadi.
           </p>
         </div>
       </div>

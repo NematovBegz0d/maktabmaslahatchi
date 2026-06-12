@@ -8,7 +8,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
 import { scoreTest, type AnswerMap, type KeyMap, type QuestionLite } from "../_shared/scoring.ts";
-import { aggregateProfile, matchCareers, type CareerRow, type ResultRow } from "../_shared/profile.ts";
+import {
+  aggregateProfile,
+  matchCareers,
+  type CareerRow,
+  type ResultRow,
+} from "../_shared/profile.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -120,7 +125,9 @@ Deno.serve(async (req: Request) => {
     // 12) Yig'ma profilni qayta qurish (barcha natijalar asosida)
     const { data: allResults } = await admin
       .from("test_results")
-      .select("test_id, raw_scores, scaled_scores, personality_type, holland_code, tests(test_type)")
+      .select(
+        "test_id, raw_scores, scaled_scores, personality_type, holland_code, tests(test_type)",
+      )
       .eq("student_id", userId);
 
     const normalized: ResultRow[] = (allResults ?? []).map((r) => ({
@@ -142,23 +149,23 @@ Deno.serve(async (req: Request) => {
     // 13) Kasb mosligi (Holland kodi asosida)
     const { data: careers } = await admin
       .from("careers")
-      .select("id, name_uz, description, holland_codes, required_skills, salary_range, universities");
+      .select(
+        "id, name_uz, description, holland_codes, required_skills, salary_range, universities",
+      );
     const topCareers = matchCareers(agg.holland_code, (careers ?? []) as CareerRow[]);
 
     // 14) student_profiles upsert
-    await admin
-      .from("student_profiles")
-      .upsert(
-        {
-          student_id: userId,
-          radar_scores: agg.radar_scores,
-          iq_scores: agg.iq_scores,
-          top_careers: topCareers,
-          profile_completeness: agg.profile_completeness,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "student_id" },
-      );
+    await admin.from("student_profiles").upsert(
+      {
+        student_id: userId,
+        radar_scores: agg.radar_scores,
+        iq_scores: agg.iq_scores,
+        top_careers: topCareers,
+        profile_completeness: agg.profile_completeness,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "student_id" },
+    );
 
     return jsonResponse({
       ok: true,

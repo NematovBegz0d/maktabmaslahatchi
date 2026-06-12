@@ -30,11 +30,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/lib/i18n";
-import {
-  CLUB_COLOR_MAP,
-  type ClubColor,
-  type ClubMemberWithProfile,
-} from "@/types/clubs";
+import { CLUB_COLOR_MAP, type ClubColor, type ClubMemberWithProfile } from "@/types/clubs";
 import {
   ArrowLeft,
   Users,
@@ -61,7 +57,7 @@ function ClubDetailPage() {
   const { id } = Route.useParams();
   const { role } = useAuth();
   const { t } = useI18n();
-  const isAdmin = role === "admin";
+  const isStaff = role === "admin" || role === "counselor";
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -82,11 +78,7 @@ function ClubDetailPage() {
   } = useQuery({
     queryKey: ["club", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("clubs")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
+      const { data, error } = await supabase.from("clubs").select("*").eq("id", id).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -104,7 +96,7 @@ function ClubDetailPage() {
       const { data, error } = await supabase
         .from("club_members")
         .select(
-          "id, student_id, joined_at, notes, profiles(id, full_name, class_number, class_letter)"
+          "id, student_id, joined_at, notes, profiles(id, full_name, class_number, class_letter)",
         )
         .eq("club_id", id)
         .order("joined_at", { ascending: false });
@@ -117,13 +109,19 @@ function ClubDetailPage() {
   // student_directory view — faqat 'student' rolidagilar (bitta so'rov).
   const { data: allStudents } = useQuery({
     queryKey: ["students-for-clubs"],
-    enabled: isAdmin,
+    enabled: isStaff,
     queryFn: async () => {
       const { data } = await supabase
         .from("student_directory")
         .select("id, full_name, class_number, class_letter")
         .order("full_name", { ascending: true });
-      return data ?? [];
+      // View tiplari nullable — id real hayotda doim mavjud (profiles.id PK)
+      return (data ?? []) as {
+        id: string;
+        full_name: string | null;
+        class_number: number | null;
+        class_letter: string | null;
+      }[];
     },
   });
 
@@ -145,8 +143,7 @@ function ClubDetailPage() {
   const availableStudents = (allStudents ?? []).filter(
     (s) =>
       !memberStudentIds.has(s.id) &&
-      (!addSearchQ ||
-        (s.full_name ?? "").toLowerCase().includes(addSearchQ.toLowerCase()))
+      (!addSearchQ || (s.full_name ?? "").toLowerCase().includes(addSearchQ.toLowerCase())),
   );
   const visibleStudents = availableStudents.slice(0, ADD_LIST_LIMIT);
   const hiddenCount = availableStudents.length - visibleStudents.length;
@@ -193,10 +190,7 @@ function ClubDetailPage() {
     if (removing) return; // double-click himoyasi
     setRemoving(true);
     try {
-      const { error } = await supabase
-        .from("club_members")
-        .delete()
-        .eq("id", memberId);
+      const { error } = await supabase.from("club_members").delete().eq("id", memberId);
       if (error) throw error;
       toast.success(t("clubs_member_removed"));
       queryClient.invalidateQueries({ queryKey: ["club-members", id] });
@@ -294,18 +288,16 @@ function ClubDetailPage() {
               </div>
 
               {/* A'zolar soni — faqat staff uchun (RLS o'quvchiga to'liq sonni bermaydi) */}
-              {isAdmin && (
+              {isStaff && (
                 <div className={`rounded-xl px-5 py-3 text-center ${colors.soft}`}>
-                  <p className={`text-3xl font-bold ${colors.text}`}>
-                    {members?.length ?? 0}
-                  </p>
+                  <p className={`text-3xl font-bold ${colors.text}`}>{members?.length ?? 0}</p>
                   <p className="text-xs text-muted-foreground">{t("clubs_member_count")}</p>
                 </div>
               )}
             </div>
 
             {/* Sinf bo'yicha breakdown — faqat staff */}
-            {isAdmin && Object.keys(classCounts).length > 0 && (
+            {isStaff && Object.keys(classCounts).length > 0 && (
               <div className="mt-5 border-t border-border/40 pt-4">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {t("clubs_by_class")}
@@ -329,7 +321,7 @@ function ClubDetailPage() {
         </Card>
 
         {/* ── A'zolar bo'limi — faqat maslahatchi/admin ko'radi ── */}
-        {isAdmin ? (
+        {isStaff ? (
           <Card className="border-border/60" style={{ boxShadow: "var(--shadow-card)" }}>
             <CardContent className="p-6">
               {/* Header + qidiruv + qo'shish */}
@@ -411,9 +403,7 @@ function ClubDetailPage() {
                             </p>
                             {/* notes faqat staff ko'radi */}
                             {m.notes && (
-                              <p className="truncate text-xs text-muted-foreground">
-                                {m.notes}
-                              </p>
+                              <p className="truncate text-xs text-muted-foreground">{m.notes}</p>
                             )}
                           </div>
                         </div>
@@ -476,7 +466,7 @@ function ClubDetailPage() {
       </main>
 
       {/* ── A'zo qo'shish modali (faqat staff) ── */}
-      {isAdmin && (
+      {isStaff && (
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
@@ -571,8 +561,8 @@ function ClubDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t("clubs_remove_title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Ushbu o'quvchini <strong>{club.name}</strong> klubidan chiqarmoqchimisiz? Bu
-              amalni qaytarib bo'lmaydi.
+              Ushbu o'quvchini <strong>{club.name}</strong> klubidan chiqarmoqchimisiz? Bu amalni
+              qaytarib bo'lmaydi.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -130,10 +130,7 @@ export function SocialPortfolio({ studentId, canEdit }: SocialPortfolioProps) {
     if (deletingId) return;
     setDeletingId(id);
     try {
-      const { error } = await supabase
-        .from("extracurricular_enrollments")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("extracurricular_enrollments").delete().eq("id", id);
       if (error) throw error;
       toast.success(t("sp_enrollment_removed"));
       invalidateEnr();
@@ -147,7 +144,10 @@ export function SocialPortfolio({ studentId, canEdit }: SocialPortfolioProps) {
   return (
     <div className="space-y-6">
       {/* ── Ijtimoiy faollik ko'rsatkichi ── */}
-      <Card className="overflow-hidden border-border/60" style={{ boxShadow: "var(--shadow-card)" }}>
+      <Card
+        className="overflow-hidden border-border/60"
+        style={{ boxShadow: "var(--shadow-card)" }}
+      >
         <div className="h-1.5 w-full" style={{ background: "var(--gradient-primary)" }} />
         <CardContent className="p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -213,7 +213,7 @@ export function SocialPortfolio({ studentId, canEdit }: SocialPortfolioProps) {
                     color={m.clubs.color as ClubColor}
                     joinedAt={m.joined_at}
                   />
-                ) : null
+                ) : null,
               )}
             </div>
           ) : (
@@ -331,7 +331,9 @@ export function SocialPortfolio({ studentId, canEdit }: SocialPortfolioProps) {
                         <p className="mt-0.5 text-sm text-muted-foreground">{e.direction}</p>
                       )}
                       <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${st.badge}`}>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${st.badge}`}
+                        >
                           {st.label}
                         </span>
                         {e.schedule && (

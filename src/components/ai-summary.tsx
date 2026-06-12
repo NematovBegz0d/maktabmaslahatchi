@@ -5,7 +5,9 @@ function renderInline(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((p, i) =>
     p.startsWith("**") && p.endsWith("**") ? (
-      <strong key={i} className="font-semibold text-foreground">{p.slice(2, -2)}</strong>
+      <strong key={i} className="font-semibold text-foreground">
+        {p.slice(2, -2)}
+      </strong>
     ) : (
       <span key={i}>{p}</span>
     ),
@@ -44,14 +46,22 @@ export function AISummary({ text }: { text: string }) {
       );
     } else if (line.startsWith("# ")) {
       flushList(`l-${i}`);
-      blocks.push(<h3 key={`h-${i}`} className="mt-5 text-lg font-bold text-foreground">{line.replace(/^#\s*/, "")}</h3>);
+      blocks.push(
+        <h3 key={`h-${i}`} className="mt-5 text-lg font-bold text-foreground">
+          {line.replace(/^#\s*/, "")}
+        </h3>,
+      );
     } else if (/^[-*]\s+/.test(line)) {
       list.push(line.replace(/^[-*]\s+/, ""));
     } else if (/^\d+\.\s+/.test(line)) {
       list.push(line.replace(/^\d+\.\s+/, ""));
     } else if (line.length > 0) {
       flushList(`l-${i}`);
-      blocks.push(<p key={`p-${i}`} className="text-sm leading-relaxed text-muted-foreground">{renderInline(line)}</p>);
+      blocks.push(
+        <p key={`p-${i}`} className="text-sm leading-relaxed text-muted-foreground">
+          {renderInline(line)}
+        </p>,
+      );
     }
   });
   flushList("l-end");

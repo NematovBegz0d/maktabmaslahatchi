@@ -1,13 +1,6 @@
 // ─── Klub turlari ─────────────────────────────────────────────────────────────
 
-export type ClubColor =
-  | "purple"
-  | "pink"
-  | "amber"
-  | "green"
-  | "blue"
-  | "orange"
-  | "cyan";
+export type ClubColor = "purple" | "pink" | "amber" | "green" | "blue" | "orange" | "cyan";
 
 export interface Club {
   id: string;

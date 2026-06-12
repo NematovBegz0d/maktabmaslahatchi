@@ -1,11 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import {
-  CATEGORY_MAP,
-  LEVEL_MAP,
-  RESULT_MAP,
-  type Achievement,
-} from "@/types/social-portfolio";
+import { CATEGORY_MAP, LEVEL_MAP, RESULT_MAP, type Achievement } from "@/types/social-portfolio";
 
 interface AchievementCardProps {
   achievement: Achievement;

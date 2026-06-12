@@ -9,12 +9,7 @@ import { QueryError } from "@/components/query-error";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/lib/i18n";
-import {
-  CLUB_COLOR_MAP,
-  type ClubColor,
-  type Club,
-  type MembershipWithClub,
-} from "@/types/clubs";
+import { CLUB_COLOR_MAP, type ClubColor, type Club, type MembershipWithClub } from "@/types/clubs";
 import { Trophy, ArrowRight, Star, BookOpen, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/my-clubs")({
@@ -63,15 +58,12 @@ function MyClubsPage() {
   });
 
   const myClubIds = new Set((memberships ?? []).map((m) => m.clubs?.id));
-  const suggestedClubs = (allClubs ?? [])
-    .filter((c) => !myClubIds.has(c.id))
-    .slice(0, 3);
+  const suggestedClubs = (allClubs ?? []).filter((c) => !myClubIds.has(c.id)).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="mx-auto max-w-4xl px-4 py-8">
-
         {/* ── Sarlavha ── */}
         <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -114,9 +106,7 @@ function MyClubsPage() {
           <Card className="mb-8 border-dashed border-border">
             <CardContent className="flex flex-col items-center py-16 text-center">
               <Trophy className="mb-4 h-14 w-14 text-muted-foreground/30" />
-              <h2 className="text-lg font-semibold text-foreground">
-                {t("clubs_my_empty_title")}
-              </h2>
+              <h2 className="text-lg font-semibold text-foreground">{t("clubs_my_empty_title")}</h2>
               <p className="mt-2 max-w-xs text-sm text-muted-foreground">
                 {t("clubs_my_empty_desc")}
               </p>
@@ -142,8 +132,7 @@ function MyClubsPage() {
               {memberships.map((m) => {
                 const club = m.clubs;
                 if (!club) return null;
-                const colors =
-                  CLUB_COLOR_MAP[club.color as ClubColor] ?? CLUB_COLOR_MAP.blue;
+                const colors = CLUB_COLOR_MAP[club.color as ClubColor] ?? CLUB_COLOR_MAP.blue;
 
                 return (
                   <Card
@@ -219,8 +208,7 @@ function MyClubsPage() {
             </h2>
             <div className="grid gap-3 sm:grid-cols-3">
               {suggestedClubs.map((club) => {
-                const colors =
-                  CLUB_COLOR_MAP[club.color as ClubColor] ?? CLUB_COLOR_MAP.blue;
+                const colors = CLUB_COLOR_MAP[club.color as ClubColor] ?? CLUB_COLOR_MAP.blue;
                 return (
                   <Link
                     key={club.id}
@@ -230,9 +218,7 @@ function MyClubsPage() {
                   >
                     <span className="text-2xl">{club.icon}</span>
                     <div className="min-w-0 flex-1">
-                      <p className={`truncate text-sm font-semibold ${colors.text}`}>
-                        {club.name}
-                      </p>
+                      <p className={`truncate text-sm font-semibold ${colors.text}`}>{club.name}</p>
                       <p className="truncate text-xs text-muted-foreground">
                         {club.focus_area.split(", ")[0]}
                       </p>

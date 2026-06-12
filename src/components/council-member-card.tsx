@@ -48,16 +48,12 @@ export function CouncilMemberCard({ member, canEdit, onDelete, deleting }: Props
 
       {/* Sektor */}
       {member.sector && (
-        <p className="mt-1.5 text-xs font-medium text-muted-foreground">
-          🧭 {member.sector}
-        </p>
+        <p className="mt-1.5 text-xs font-medium text-muted-foreground">🧭 {member.sector}</p>
       )}
 
       {/* Izoh */}
       {member.notes && (
-        <p className="mt-1 line-clamp-2 text-xs italic text-muted-foreground">
-          "{member.notes}"
-        </p>
+        <p className="mt-1 line-clamp-2 text-xs italic text-muted-foreground">"{member.notes}"</p>
       )}
     </div>
   );

@@ -42,7 +42,7 @@ function currentTerm(): string {
 function CouncilPage() {
   const { role } = useAuth();
   const { t } = useI18n();
-  const isAdmin = role === "admin";
+  const isStaff = role === "admin" || role === "counselor";
   const queryClient = useQueryClient();
   const term = currentTerm();
 
@@ -60,9 +60,7 @@ function CouncilPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("council_members")
-        .select(
-          "*, profiles(id, full_name, class_number, class_letter)"
-        )
+        .select("*, profiles(id, full_name, class_number, class_letter)")
         .order("created_at", { ascending: true });
       if (error) throw error;
       return (data ?? []) as unknown as CouncilMemberWithProfile[];
@@ -150,11 +148,11 @@ function CouncilPage() {
               <Landmark className="h-7 w-7 text-primary" /> {t("council_page_title")}
             </h1>
             <p className="mt-1.5 text-muted-foreground">
-              {t("council_subtitle")}{" "}
-              <span className="font-medium text-foreground">{term}</span> {t("council_year")}.
+              {t("council_subtitle")} <span className="font-medium text-foreground">{term}</span>{" "}
+              {t("council_year")}.
             </p>
           </div>
-          {isAdmin && (
+          {isStaff && (
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => setAddActivityOpen(true)}>
                 <CalendarPlus className="mr-1.5 h-4 w-4" /> {t("council_add_activity")}
@@ -181,7 +179,7 @@ function CouncilPage() {
               <Landmark className="mb-4 h-14 w-14 text-muted-foreground/30" />
               <h2 className="text-lg font-semibold text-foreground">{t("council_empty_title")}</h2>
               <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-                {isAdmin ? t("council_empty_admin") : t("council_empty_student")}
+                {isStaff ? t("council_empty_admin") : t("council_empty_student")}
               </p>
             </CardContent>
           </Card>
@@ -202,7 +200,7 @@ function CouncilPage() {
                       <CouncilMemberCard
                         key={m.id}
                         member={m}
-                        canEdit={isAdmin}
+                        canEdit={isStaff}
                         onDelete={deleteMember}
                         deleting={deletingId === m.id}
                       />
@@ -231,13 +229,17 @@ function CouncilPage() {
           ) : (activities?.length ?? 0) === 0 ? (
             <Card className="border-dashed border-border">
               <CardContent className="py-10 text-center text-sm text-muted-foreground">
-                {isAdmin ? t("council_act_empty_admin") : t("council_act_empty_student")}
+                {isStaff ? t("council_act_empty_admin") : t("council_act_empty_student")}
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-3">
               {activities!.map((a) => (
-                <Card key={a.id} className="border-border/60" style={{ boxShadow: "var(--shadow-card)" }}>
+                <Card
+                  key={a.id}
+                  className="border-border/60"
+                  style={{ boxShadow: "var(--shadow-card)" }}
+                >
                   <CardContent className="flex items-start gap-3 p-4">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <CalendarDays className="h-5 w-5" />
@@ -245,7 +247,7 @@ function CouncilPage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <p className="font-semibold text-foreground leading-tight">{a.title}</p>
-                        {isAdmin && (
+                        {isStaff && (
                           <Button
                             variant="ghost"
                             size="icon"
@@ -279,7 +281,7 @@ function CouncilPage() {
       </main>
 
       {/* ── Dialoglar (faqat admin) ── */}
-      {isAdmin && (
+      {isStaff && (
         <>
           <AddCouncilMemberDialog
             open={addMemberOpen}

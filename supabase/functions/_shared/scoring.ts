@@ -101,7 +101,10 @@ function scoreBigFive(qs: QuestionLite[], answers: AnswerMap): ScoredResult {
   const dims = ["O", "C", "E", "A", "N"];
   const raw: Record<string, number> = {};
   const maxv: Record<string, number> = {};
-  dims.forEach((d) => { raw[d] = 0; maxv[d] = 0; });
+  dims.forEach((d) => {
+    raw[d] = 0;
+    maxv[d] = 0;
+  });
 
   for (const q of qs) {
     const sub = (q.subscale ?? "").toUpperCase();

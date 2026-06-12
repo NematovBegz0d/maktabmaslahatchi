@@ -82,9 +82,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "EduLens — Maktab maslahatchisi platformasi" },
-      { name: "description", content: "O'quvchilarning psixologiyasi, intellekti va kelajagini ilmiy testlar orqali aniqlash tizimi." },
+      {
+        name: "description",
+        content:
+          "O'quvchilarning psixologiyasi, intellekti va kelajagini ilmiy testlar orqali aniqlash tizimi.",
+      },
       { property: "og:title", content: "EduLens" },
-      { property: "og:description", content: "Maktab maslahatchilari uchun professional psixometrik platforma." },
+      {
+        property: "og:description",
+        content: "Maktab maslahatchilari uchun professional psixometrik platforma.",
+      },
       { property: "og:type", content: "website" },
     ],
     links: [

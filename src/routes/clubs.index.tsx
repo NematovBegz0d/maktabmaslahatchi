@@ -25,7 +25,7 @@ export const Route = createFileRoute("/clubs/")({
 function ClubsPage() {
   const { user, role } = useAuth();
   const { t } = useI18n();
-  const isAdmin = role === "admin";
+  const isStaff = role === "admin" || role === "counselor";
 
   // DB dan klublar (id lar bilan)
   const {
@@ -62,7 +62,7 @@ function ClubsPage() {
   // O'quvchi uchun — o'zining klublari
   const { data: myMemberships } = useQuery({
     queryKey: ["my-club-memberships", user?.id],
-    enabled: !!user && !isAdmin,
+    enabled: !!user && !isStaff,
     queryFn: async () => {
       const { data } = await supabase
         .from("club_members")
@@ -86,17 +86,12 @@ function ClubsPage() {
         }));
 
   // Statistika
-  const totalMembers = memberCounts
-    ? Object.values(memberCounts).reduce((a, b) => a + b, 0)
-    : 0;
-  const topClub = (clubs ?? []).reduce<{ name: string; count: number } | null>(
-    (top, c) => {
-      const count = memberCounts?.[c.id] ?? 0;
-      if (!top || count > top.count) return { name: c.name, count };
-      return top;
-    },
-    null
-  );
+  const totalMembers = memberCounts ? Object.values(memberCounts).reduce((a, b) => a + b, 0) : 0;
+  const topClub = (clubs ?? []).reduce<{ name: string; count: number } | null>((top, c) => {
+    const count = memberCounts?.[c.id] ?? 0;
+    if (!top || count > top.count) return { name: c.name, count };
+    return top;
+  }, null);
   const myClubCount = myMemberships?.size ?? 0;
 
   return (
@@ -109,7 +104,7 @@ function ClubsPage() {
             <Trophy className="h-7 w-7 text-primary" /> {t("clubs_title")}
           </h1>
           <p className="mt-1.5 text-muted-foreground">
-            {isAdmin ? t("clubs_subtitle_staff") : t("clubs_subtitle_student")}
+            {isStaff ? t("clubs_subtitle_staff") : t("clubs_subtitle_student")}
           </p>
         </div>
 
@@ -118,7 +113,7 @@ function ClubsPage() {
         ) : (
           <>
             {/* ── Statistika (faqat admin) ── */}
-            {isAdmin && (
+            {isStaff && (
               <div className="mb-8 grid gap-4 sm:grid-cols-3">
                 <StatCard
                   label={t("clubs_total")}
@@ -142,7 +137,7 @@ function ClubsPage() {
             )}
 
             {/* ── O'quvchi uchun stat ── */}
-            {!isAdmin && (
+            {!isStaff && (
               <div className="mb-8 grid gap-4 sm:grid-cols-2">
                 <StatCard
                   label={t("clubs_total")}
@@ -184,11 +179,10 @@ function ClubsPage() {
             ) : (
               <>
                 {/* DB bo'sh bo'lsa ogohlantirish (gridtdan oldin) */}
-                {isFallback && isAdmin && (
+                {isFallback && isStaff && (
                   <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-                    ⚠️ Klublar hali databazaga qo'shilmagan. Quyidagi klublar namuna
-                    ko'rinishida ko'rsatilmoqda. Ularni Supabase migratsiyasi orqali seed
-                    qiling.
+                    ⚠️ Klublar hali databazaga qo'shilmagan. Quyidagi klublar namuna ko'rinishida
+                    ko'rsatilmoqda. Ularni Supabase migratsiyasi orqali seed qiling.
                   </div>
                 )}
 

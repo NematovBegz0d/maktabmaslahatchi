@@ -30,7 +30,9 @@ export function matchCareers(hollandCode: string | null, careers: CareerRow[]) {
   const letters = hollandCode.toUpperCase().split("");
   // Pozitsiyaga qarab vazn: 1-harf=3, 2-harf=2, 3-harf=1
   const weight: Record<string, number> = {};
-  letters.forEach((l, i) => { weight[l] = 3 - i; });
+  letters.forEach((l, i) => {
+    weight[l] = 3 - i;
+  });
 
   const scored = careers.map((c) => {
     let score = 0;
@@ -56,10 +58,7 @@ export function matchCareers(hollandCode: string | null, careers: CareerRow[]) {
 }
 
 // --- Yig'ma profil: barcha natijalardan radar va IQ qurish ---------
-export function aggregateProfile(
-  results: ResultRow[],
-  totalTests: number,
-) {
+export function aggregateProfile(results: ResultRow[], totalTests: number) {
   const byType: Record<string, ResultRow> = {};
   for (const r of results) {
     if (r.test_type) byType[r.test_type] = r;
@@ -111,10 +110,7 @@ export function aggregateProfile(
   const hollandCode = byType["holland"]?.holland_code ?? null;
   const mbti = byType["eysenck"]?.personality_type ?? null;
 
-  const completeness = Math.min(
-    100,
-    Math.round((results.length / Math.max(totalTests, 1)) * 100),
-  );
+  const completeness = Math.min(100, Math.round((results.length / Math.max(totalTests, 1)) * 100));
 
   return {
     radar_scores: radar,

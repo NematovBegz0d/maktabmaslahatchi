@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Search, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { POSITION_MAP, POSITION_ORDER, type CouncilPosition } from "@/types/council";
 
 interface Props {
@@ -39,6 +40,7 @@ export function AddCouncilMemberDialog({
   existingStudentIds,
   onAdded,
 }: Props) {
+  const { schoolId } = useAuth();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [position, setPosition] = useState<CouncilPosition>("member");
@@ -56,14 +58,20 @@ export function AddCouncilMemberDialog({
         .from("student_directory")
         .select("id, full_name, class_number, class_letter")
         .order("full_name", { ascending: true });
-      return data ?? [];
+      // View tiplari nullable — id real hayotda doim mavjud (profiles.id PK)
+      return (data ?? []) as {
+        id: string;
+        full_name: string | null;
+        class_number: number | null;
+        class_letter: string | null;
+      }[];
     },
   });
 
   const available = (students ?? []).filter(
     (s) =>
       !existingStudentIds.has(s.id) &&
-      (!search || (s.full_name ?? "").toLowerCase().includes(search.toLowerCase()))
+      (!search || (s.full_name ?? "").toLowerCase().includes(search.toLowerCase())),
   );
   const visible = available.slice(0, ADD_LIST_LIMIT);
   const hidden = available.length - visible.length;
@@ -91,6 +99,8 @@ export function AddCouncilMemberDialog({
         term,
         elected_at: electedAt || null,
         notes: notes.trim() || null,
+        // Maktabga bog'lash — maslahatchi RLS'i shuni talab qiladi (adminda null bo'lishi mumkin)
+        school_id: schoolId,
       });
       if (error) throw error;
       toast.success("Kengash a'zosi qo'shildi!");
@@ -99,10 +109,14 @@ export function AddCouncilMemberDialog({
       onAdded();
     } catch (e: unknown) {
       const err = e as { code?: string; message?: string };
-      if (err.code === "23505") toast.error("Bu o'quvchi shu o'quv yilida allaqachon kengash a'zosi.");
+      if (err.code === "23505")
+        toast.error("Bu o'quvchi shu o'quv yilida allaqachon kengash a'zosi.");
       else if (err.code === "42501" || err.code === "PGRST301")
         toast.error("Sizda bu amalni bajarish uchun ruxsat yo'q.");
-      else { console.error("[add-council-member]", err); toast.error("Xatolik yuz berdi. Qayta urinib ko'ring."); }
+      else {
+        console.error("[add-council-member]", err);
+        toast.error("Xatolik yuz berdi. Qayta urinib ko'ring.");
+      }
     } finally {
       setSaving(false);
     }

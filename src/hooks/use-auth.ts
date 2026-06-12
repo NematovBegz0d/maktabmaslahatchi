@@ -8,6 +8,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
+  const [schoolId, setSchoolId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,13 +39,17 @@ export function useAuth() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  async function fetchRole(_uid: string) {
+  async function fetchRole(uid: string) {
     try {
-      const { data, error } = await supabase.rpc("get_my_role");
+      const [{ data, error }, { data: profile }] = await Promise.all([
+        supabase.rpc("get_my_role"),
+        supabase.from("profiles").select("school_id").eq("id", uid).maybeSingle(),
+      ]);
       if (error) throw error;
       const r = (data as string | null) ?? "student";
       console.log("[useAuth] role from RPC:", r);
       setRole(r as AppRole);
+      setSchoolId(profile?.school_id ?? null);
     } catch (e) {
       console.error("[useAuth] fetchRole error:", e);
       setRole("student");
@@ -53,5 +58,8 @@ export function useAuth() {
     }
   }
 
-  return { session, user, role, loading };
+  // isStaff — maktab kontentini boshqaradigan rollar (maslahatchi va super admin)
+  const isStaff = role === "admin" || role === "counselor";
+
+  return { session, user, role, schoolId, isStaff, loading };
 }

@@ -8,12 +8,25 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/lib/theme";
 import { useI18n } from "@/lib/i18n";
 import {
-  LogOut, LayoutDashboard, ClipboardList, User as UserIcon,
-  Users, TrendingUp, Moon, Sun, Menu, Trophy, Activity, Landmark,
+  LogOut,
+  LayoutDashboard,
+  ClipboardList,
+  User as UserIcon,
+  Users,
+  TrendingUp,
+  Moon,
+  Sun,
+  Menu,
+  Trophy,
+  Activity,
+  Landmark,
+  Shield,
 } from "lucide-react";
 
-const NAV_LINK = "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors";
-const NAV_LINK_ACTIVE = "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-accent text-foreground";
+const NAV_LINK =
+  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors";
+const NAV_LINK_ACTIVE =
+  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-accent text-foreground";
 
 export function AppHeader() {
   const navigate = useNavigate();
@@ -25,6 +38,7 @@ export function AppHeader() {
   // aks holda o'quvchi havolalari bir lahza "flash" qilib keyin yo'qoladi.
   const roleKnown = role !== null;
   const isAdmin = role === "admin";
+  const isStaff = role === "admin" || role === "counselor";
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -37,19 +51,69 @@ export function AppHeader() {
 
   // Nav havolalari ro'yxati — rol bo'yicha
   const navLinks = [
-    { to: "/dashboard" as const, icon: LayoutDashboard, label: t("nav_dashboard"), show: true },
+    // Super admin uchun boshqaruv paneli
+    { to: "/admin" as const, icon: Shield, label: "Boshqaruv", show: roleKnown && isAdmin },
+    {
+      to: "/dashboard" as const,
+      icon: LayoutDashboard,
+      label: t("nav_dashboard"),
+      show: !roleKnown || !isAdmin,
+    },
     // O'quvchi (faqat rol aniqlangach)
-    { to: "/my-tests" as const, icon: ClipboardList, label: t("nav_tests"), show: roleKnown && !isAdmin },
-    { to: "/my-clubs" as const, icon: Trophy, label: t("nav_clubs"), show: roleKnown && !isAdmin },
-    { to: "/social-portfolio" as const, icon: Activity, label: t("nav_social"), show: roleKnown && !isAdmin },
-    { to: "/council" as const, icon: Landmark, label: t("nav_council"), show: roleKnown && !isAdmin },
-    { to: "/my-profile" as const, icon: UserIcon, label: t("nav_profile"), show: roleKnown && !isAdmin },
-    // Admin (faqat rol aniqlangach)
-    { to: "/students" as const, icon: Users, label: t("nav_students"), show: roleKnown && isAdmin },
-    { to: "/tests-manage" as const, icon: ClipboardList, label: t("nav_tests"), show: roleKnown && isAdmin },
-    { to: "/clubs" as const, icon: Trophy, label: t("nav_clubs"), show: roleKnown && isAdmin },
-    { to: "/council" as const, icon: Landmark, label: t("nav_council"), show: roleKnown && isAdmin },
-    { to: "/analytics" as const, icon: TrendingUp, label: t("nav_analytics"), show: roleKnown && isAdmin },
+    {
+      to: "/my-tests" as const,
+      icon: ClipboardList,
+      label: t("nav_tests"),
+      show: roleKnown && !isStaff,
+    },
+    { to: "/my-clubs" as const, icon: Trophy, label: t("nav_clubs"), show: roleKnown && !isStaff },
+    {
+      to: "/social-portfolio" as const,
+      icon: Activity,
+      label: t("nav_social"),
+      show: roleKnown && !isStaff,
+    },
+    {
+      to: "/council" as const,
+      icon: Landmark,
+      label: t("nav_council"),
+      show: roleKnown && !isStaff,
+    },
+    {
+      to: "/my-profile" as const,
+      icon: UserIcon,
+      label: t("nav_profile"),
+      show: roleKnown && !isStaff,
+    },
+    // Xodim: maslahatchi + super admin (faqat rol aniqlangach)
+    { to: "/students" as const, icon: Users, label: t("nav_students"), show: roleKnown && isStaff },
+    // Testlar bazasi butun platforma uchun yagona — faqat super admin boshqaradi
+    {
+      to: "/tests-manage" as const,
+      icon: ClipboardList,
+      label: t("nav_tests"),
+      show: roleKnown && isAdmin,
+    },
+    { to: "/clubs" as const, icon: Trophy, label: t("nav_clubs"), show: roleKnown && isStaff },
+    // Maslahatchi: admindan kelgan vazifalar va xabarlar
+    {
+      to: "/tasks" as const,
+      icon: ClipboardList,
+      label: "Vazifalar",
+      show: roleKnown && role === "counselor",
+    },
+    {
+      to: "/council" as const,
+      icon: Landmark,
+      label: t("nav_council"),
+      show: roleKnown && isStaff,
+    },
+    {
+      to: "/analytics" as const,
+      icon: TrendingUp,
+      label: t("nav_analytics"),
+      show: roleKnown && isStaff,
+    },
   ].filter((l) => l.show);
 
   return (
@@ -66,10 +130,13 @@ export function AppHeader() {
               key={to}
               to={to}
               className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              activeProps={{ className: "rounded-lg px-3 py-2 text-sm font-medium bg-accent text-foreground" }}
+              activeProps={{
+                className: "rounded-lg px-3 py-2 text-sm font-medium bg-accent text-foreground",
+              }}
             >
               <span className="inline-flex items-center gap-2">
-                <Icon className="h-4 w-4" aria-hidden="true" />{label}
+                <Icon className="h-4 w-4" aria-hidden="true" />
+                {label}
               </span>
             </Link>
           ))}
@@ -90,11 +157,15 @@ export function AppHeader() {
             variant="ghost"
             size="sm"
             onClick={toggleTheme}
-            aria-label={resolvedTheme === "dark" ? "Yorug' rejimga o'tish" : "Qorong'u rejimga o'tish"}
+            aria-label={
+              resolvedTheme === "dark" ? "Yorug' rejimga o'tish" : "Qorong'u rejimga o'tish"
+            }
           >
-            {resolvedTheme === "dark"
-              ? <Sun className="h-4 w-4" aria-hidden="true" />
-              : <Moon className="h-4 w-4" aria-hidden="true" />}
+            {resolvedTheme === "dark" ? (
+              <Sun className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Moon className="h-4 w-4" aria-hidden="true" />
+            )}
           </Button>
           <Button
             variant="ghost"
@@ -103,7 +174,8 @@ export function AppHeader() {
             aria-label={t("nav_signout")}
             className="hidden md:inline-flex"
           >
-            <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />{t("nav_signout")}
+            <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+            {t("nav_signout")}
           </Button>
 
           {/* Mobile hamburger */}
@@ -127,16 +199,23 @@ export function AppHeader() {
                     activeProps={{ className: NAV_LINK_ACTIVE }}
                     onClick={() => setOpen(false)}
                   >
-                    <Icon className="h-4 w-4" aria-hidden="true" />{label}
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                    {label}
                   </Link>
                 ))}
                 <div className="mt-2 border-t pt-2">
                   <button
-                    onClick={() => { setOpen(false); signOut(); }}
-                    className={NAV_LINK + " w-full text-left text-destructive hover:text-destructive"}
+                    onClick={() => {
+                      setOpen(false);
+                      signOut();
+                    }}
+                    className={
+                      NAV_LINK + " w-full text-left text-destructive hover:text-destructive"
+                    }
                     aria-label={t("nav_signout")}
                   >
-                    <LogOut className="h-4 w-4" aria-hidden="true" />{t("nav_signout")}
+                    <LogOut className="h-4 w-4" aria-hidden="true" />
+                    {t("nav_signout")}
                   </button>
                 </div>
               </nav>

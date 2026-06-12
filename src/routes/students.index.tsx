@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/protected-route";
 import { AppHeader } from "@/components/app-header";
@@ -10,7 +10,15 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, ChevronRight, Search, ChevronLeft, UserPlus, Archive, RotateCcw } from "lucide-react";
+import {
+  Users,
+  ChevronRight,
+  Search,
+  ChevronLeft,
+  UserPlus,
+  Archive,
+  RotateCcw,
+} from "lucide-react";
 import { QueryError } from "@/components/query-error";
 import { useI18n } from "@/lib/i18n";
 
@@ -27,7 +35,11 @@ interface StudentRow {
 
 export const Route = createFileRoute("/students/")({
   head: () => ({ meta: [{ title: "O'quvchilar — EduLens" }] }),
-  component: () => (<ProtectedRoute requiredRoles={["admin"]}><StudentsList /></ProtectedRoute>),
+  component: () => (
+    <ProtectedRoute requiredRoles={["admin", "counselor"]}>
+      <StudentsList />
+    </ProtectedRoute>
+  ),
 });
 
 function StudentsList() {
@@ -38,15 +50,23 @@ function StudentsList() {
   const qc = useQueryClient();
   const { t } = useI18n();
 
+  // Server-side qidiruv + pagination — 1500 o'quvchili maktablarda ham tez ishlaydi.
+  // RLS tufayli maslahatchi faqat o'z maktabi o'quvchilarini oladi.
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["students-list", view],
+    queryKey: ["students-list", view, q, page],
+    placeholderData: keepPreviousData,
     queryFn: async () => {
-      // active -> student_directory, archived -> archived_students (ikkalasi ham student rolli)
-      const { data } = await supabase
+      let query = supabase
         .from(view === "active" ? "student_directory" : "archived_students")
-        .select("id, full_name, class_number, class_letter, school_id, school_name")
+        .select("id, full_name, class_number, class_letter, school_id, school_name", {
+          count: "exact",
+        })
         .order("full_name", { ascending: true });
-      return (data ?? []) as StudentRow[];
+      if (q.trim()) query = query.ilike("full_name", `%${q.trim()}%`);
+      const from = (page - 1) * PAGE_SIZE;
+      const { data, count, error } = await query.range(from, from + PAGE_SIZE - 1);
+      if (error) throw error;
+      return { rows: (data ?? []) as StudentRow[], total: count ?? 0 };
     },
   });
 
@@ -64,13 +84,10 @@ function StudentsList() {
     qc.invalidateQueries({ queryKey: ["admin-students"] });
   }
 
-  const filtered = (data ?? []).filter((s) =>
-    !q || (s.full_name ?? "").toLowerCase().includes(q.toLowerCase())
-  );
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = data?.rows ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
-  const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   function handleSearch(value: string) {
     setQ(value);
@@ -86,7 +103,9 @@ function StudentsList() {
             <h1 className="flex items-center gap-2 text-3xl font-bold text-foreground">
               <Users className="h-7 w-7 text-primary" /> O'quvchilar
             </h1>
-            <p className="mt-1 text-muted-foreground">Maslahatchi paneli — o'quvchilar ro'yxati va profillari.</p>
+            <p className="mt-1 text-muted-foreground">
+              Maslahatchi paneli — o'quvchilar ro'yxati va profillari.
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <div className="relative w-full max-w-xs">
@@ -109,17 +128,27 @@ function StudentsList() {
         {/* Aktiv / Arxiv toggle */}
         <div className="mb-4 inline-flex rounded-lg border border-border bg-muted/30 p-1">
           <button
-            onClick={() => { setView("active"); setPage(1); }}
+            onClick={() => {
+              setView("active");
+              setPage(1);
+            }}
             className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-              view === "active" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              view === "active"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <Users className="mr-1.5 inline h-4 w-4" /> Aktiv o'quvchilar
           </button>
           <button
-            onClick={() => { setView("archived"); setPage(1); }}
+            onClick={() => {
+              setView("archived");
+              setPage(1);
+            }}
             className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-              view === "archived" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              view === "archived"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <Archive className="mr-1.5 inline h-4 w-4" /> Arxiv
@@ -142,14 +171,16 @@ function StudentsList() {
               </Card>
             ))}
           </div>
-        ) : filtered.length === 0 ? (
-          <Card><CardContent className="p-10 text-center text-muted-foreground">
-            {view === "archived" ? "Arxivlangan o'quvchi yo'q." : t("students_empty")}
-          </CardContent></Card>
+        ) : total === 0 ? (
+          <Card>
+            <CardContent className="p-10 text-center text-muted-foreground">
+              {view === "archived" ? "Arxivlangan o'quvchi yo'q." : t("students_empty")}
+            </CardContent>
+          </Card>
         ) : (
           <>
             <div className="mb-2 text-sm text-muted-foreground">
-              Jami: <span className="font-medium text-foreground">{filtered.length}</span> ta o'quvchi
+              Jami: <span className="font-medium text-foreground">{total}</span> ta o'quvchi
             </div>
             <div className="grid gap-3">
               {paginated.map((s) => {
@@ -161,7 +192,9 @@ function StudentsList() {
                     <div>
                       <p className="font-semibold text-foreground">{s.full_name ?? "Noma'lum"}</p>
                       <p className="text-xs text-muted-foreground">
-                        {s.class_number ? `${s.class_number}-${s.class_letter ?? ""} sinf` : "Sinf kiritilmagan"}
+                        {s.class_number
+                          ? `${s.class_number}-${s.class_letter ?? ""} sinf`
+                          : "Sinf kiritilmagan"}
                         {s.school_name ? ` • ${s.school_name}` : ""}
                       </p>
                     </div>
@@ -170,15 +203,22 @@ function StudentsList() {
 
                 if (view === "archived") {
                   return (
-                    <Card key={s.id} className="border-border/60 opacity-90" style={{ boxShadow: "var(--shadow-card)" }}>
+                    <Card
+                      key={s.id}
+                      className="border-border/60 opacity-90"
+                      style={{ boxShadow: "var(--shadow-card)" }}
+                    >
                       <CardContent className="flex items-center justify-between p-4">
                         {info}
                         <Button
-                          size="sm" variant="outline" disabled={restoringId === s.id}
+                          size="sm"
+                          variant="outline"
+                          disabled={restoringId === s.id}
                           onClick={() => restoreStudent(s.id)}
                           className="shrink-0 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/30"
                         >
-                          <RotateCcw className="mr-1.5 h-4 w-4" /> {restoringId === s.id ? "..." : "Qaytarish"}
+                          <RotateCcw className="mr-1.5 h-4 w-4" />{" "}
+                          {restoringId === s.id ? "..." : "Qaytarish"}
                         </Button>
                       </CardContent>
                     </Card>
@@ -187,11 +227,16 @@ function StudentsList() {
 
                 return (
                   <Link key={s.id} to="/students/$id" params={{ id: s.id }} className="block">
-                    <Card className="border-border/60 transition hover:border-primary/40 hover:shadow-md" style={{ boxShadow: "var(--shadow-card)" }}>
+                    <Card
+                      className="border-border/60 transition hover:border-primary/40 hover:shadow-md"
+                      style={{ boxShadow: "var(--shadow-card)" }}
+                    >
                       <CardContent className="flex items-center justify-between p-4">
                         {info}
                         <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="bg-primary/10 text-primary">Profil</Badge>
+                          <Badge variant="secondary" className="bg-primary/10 text-primary">
+                            Profil
+                          </Badge>
                           <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         </div>
                       </CardContent>
@@ -204,9 +249,10 @@ function StudentsList() {
             {totalPages > 1 && (
               <div className="mt-6 flex flex-col items-center gap-3">
                 <p className="text-sm text-muted-foreground" aria-live="polite">
-                  {t("page")} <span className="font-semibold text-foreground">{safePage}</span> / <span className="font-semibold text-foreground">{totalPages}</span>
-                  {" "}·{" "}
-                  {t("students_total")}: <span className="font-semibold text-foreground">{filtered.length}</span> ta o'quvchi
+                  {t("page")} <span className="font-semibold text-foreground">{safePage}</span> /{" "}
+                  <span className="font-semibold text-foreground">{totalPages}</span> ·{" "}
+                  {t("students_total")}:{" "}
+                  <span className="font-semibold text-foreground">{total}</span> ta o'quvchi
                 </p>
                 <div className="flex items-center gap-2">
                   <Button
@@ -227,7 +273,9 @@ function StudentsList() {
                     }, [])
                     .map((p, i) =>
                       p === "…" ? (
-                        <span key={`ellipsis-${i}`} className="px-1 text-muted-foreground">…</span>
+                        <span key={`ellipsis-${i}`} className="px-1 text-muted-foreground">
+                          …
+                        </span>
                       ) : (
                         <Button
                           key={p}
@@ -240,7 +288,7 @@ function StudentsList() {
                         >
                           {p}
                         </Button>
-                      )
+                      ),
                     )}
                   <Button
                     variant="outline"

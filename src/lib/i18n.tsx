@@ -58,7 +58,8 @@ const translations = {
     // Clubs
     clubs_title: "Maktab Klublari",
     clubs_subtitle_staff: "Maktab klublarini boshqaring va o'quvchilarni ro'yxatga oling.",
-    clubs_subtitle_student: "Qiziqishlaringizga mos klubga qo'shiling va iqtidoringizni rivojlantiring.",
+    clubs_subtitle_student:
+      "Qiziqishlaringizga mos klubga qo'shiling va iqtidoringizni rivojlantiring.",
     clubs_total: "Jami klublar",
     clubs_total_members: "Jami a'zolar",
     clubs_top: "Eng faol klub",
@@ -80,7 +81,8 @@ const translations = {
     clubs_my_subtitle: "A'zo bo'lgan klublaringiz va faoliyat yo'nalishlaringiz.",
     clubs_all: "Barcha klublar",
     clubs_my_empty_title: "Hali hech bir klubga a'zo emassiz",
-    clubs_my_empty_desc: "Maktab maslahatchiingiz sizni klubga qo'shadi. Quyidagi klublar bilan tanishib chiqing.",
+    clubs_my_empty_desc:
+      "Maktab maslahatchiingiz sizni klubga qo'shadi. Quyidagi klublar bilan tanishib chiqing.",
     clubs_view_all: "Klublarni ko'rish",
     clubs_member_added: "A'zo muvaffaqiyatli qo'shildi!",
     clubs_member_removed: "A'zo ro'yxatdan chiqarildi.",
@@ -98,7 +100,7 @@ const translations = {
     council_empty_admin: "\"A'zo qo'shish\" tugmasi orqali kengash a'zolarini saylang.",
     council_empty_student: "Tez orada o'quvchilar kengashi a'zolari e'lon qilinadi.",
     council_activities_title: "Kengash faoliyati",
-    council_act_empty_admin: "Hali faoliyat qo'shilmagan. \"Faoliyat\" tugmasini bosing.",
+    council_act_empty_admin: 'Hali faoliyat qo\'shilmagan. "Faoliyat" tugmasini bosing.',
     council_act_empty_student: "Hali kengash faoliyati e'lon qilinmagan.",
     council_member_removed: "A'zo o'chirildi.",
     council_activity_removed: "Faoliyat o'chirildi.",
@@ -308,11 +310,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     return translations[locale][key] ?? translations.uz[key] ?? key;
   }
 
-  return (
-    <I18nContext.Provider value={{ locale, setLocale, t }}>
-      {children}
-    </I18nContext.Provider>
-  );
+  return <I18nContext.Provider value={{ locale, setLocale, t }}>{children}</I18nContext.Provider>;
 }
 
 export function useI18n() {

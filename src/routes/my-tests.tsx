@@ -12,15 +12,27 @@ import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/my-tests")({
   head: () => ({ meta: [{ title: "Mening testlarim — EduLens" }] }),
-  component: () => (<ProtectedRoute><MyTests /></ProtectedRoute>),
+  component: () => (
+    <ProtectedRoute>
+      <MyTests />
+    </ProtectedRoute>
+  ),
 });
 
 function MyTests() {
   const { user } = useAuth();
-  const { data: tests, isLoading, error } = useQuery({
+  const {
+    data: tests,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["all-tests"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("tests").select("*").eq("is_active", true).order("created_at");
+      const { data, error } = await supabase
+        .from("tests")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at");
       if (error) throw error;
       return data ?? [];
     },
@@ -29,7 +41,10 @@ function MyTests() {
     queryKey: ["my-sessions", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.from("test_sessions").select("test_id, status").eq("student_id", user!.id);
+      const { data } = await supabase
+        .from("test_sessions")
+        .select("test_id, status")
+        .eq("student_id", user!.id);
       return data ?? [];
     },
   });
@@ -49,7 +64,9 @@ function MyTests() {
       <AppHeader />
       <main className="mx-auto max-w-7xl px-4 py-8">
         <h1 className="text-3xl font-bold text-foreground">Mening testlarim</h1>
-        <p className="mt-1 text-muted-foreground">Quyidagi testlar orqali o'zingizni to'liq tahlil qiling.</p>
+        <p className="mt-1 text-muted-foreground">
+          Quyidagi testlar orqali o'zingizni to'liq tahlil qiling.
+        </p>
         {isLoading ? (
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (

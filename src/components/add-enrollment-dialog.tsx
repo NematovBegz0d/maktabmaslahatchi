@@ -67,7 +67,10 @@ export function AddEnrollmentDialog({ studentId, open, onOpenChange, onAdded }: 
       const err = e as { code?: string; message?: string };
       if (err.code === "42501" || err.code === "PGRST301")
         toast.error("Sizda bu amalni bajarish uchun ruxsat yo'q.");
-      else { console.error("[add-enrollment]", err); toast.error("Xatolik yuz berdi. Qayta urinib ko'ring."); }
+      else {
+        console.error("[add-enrollment]", err);
+        toast.error("Xatolik yuz berdi. Qayta urinib ko'ring.");
+      }
     } finally {
       setSaving(false);
     }
@@ -127,11 +130,7 @@ export function AddEnrollmentDialog({ studentId, open, onOpenChange, onAdded }: 
 
             <div>
               <Label className="mb-1.5 block text-xs">Boshlangan sana</Label>
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
+              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             </div>
           </div>
         </div>

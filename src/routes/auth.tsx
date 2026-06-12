@@ -38,7 +38,9 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-8 flex justify-center">
-          <Link to="/"><Logo /></Link>
+          <Link to="/">
+            <Logo />
+          </Link>
         </div>
 
         <div
@@ -67,7 +69,9 @@ function AuthPage() {
         </div>
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-foreground">← {t("go_home")}</Link>
+          <Link to="/" className="hover:text-foreground">
+            ← {t("go_home")}
+          </Link>
         </p>
       </div>
     </div>
@@ -115,9 +119,7 @@ function LoginForm() {
     setBusy(true);
 
     // Email aniqlash: @ bo'lmasa → guvohnoma seriyasi → @edulab.uz
-    const email = loginId.includes("@")
-      ? loginId.trim()
-      : toStudentEmail(loginId);
+    const email = loginId.includes("@") ? loginId.trim() : toStudentEmail(loginId);
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
@@ -194,8 +196,11 @@ function LoginForm() {
       </div>
 
       {isLocked && (
-        <p className="rounded-lg bg-destructive/10 px-3 py-2 text-center text-sm font-medium text-destructive"
-          role="alert" aria-live="assertive">
+        <p
+          className="rounded-lg bg-destructive/10 px-3 py-2 text-center text-sm font-medium text-destructive"
+          role="alert"
+          aria-live="assertive"
+        >
           Kirish bloklangan — {countdown} soniyadan so'ng qayta urinish
         </p>
       )}

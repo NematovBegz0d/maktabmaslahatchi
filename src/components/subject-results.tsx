@@ -34,16 +34,23 @@ export function SubjectResults({ items }: { items: SubjectResult[] }) {
               <div key={s.test_id} className="rounded-xl border border-border/50 p-4">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-semibold text-foreground">{s.name}</span>
-                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${g.color} bg-muted/60`}>
+                  <span
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${g.color} bg-muted/60`}
+                  >
                     {s.grade}
                   </span>
                 </div>
                 <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
                   <span className={`font-semibold ${g.color}`}>{g.label}</span>
-                  <span>{s.correct}/{s.total} to'g'ri • {s.percent}%</span>
+                  <span>
+                    {s.correct}/{s.total} to'g'ri • {s.percent}%
+                  </span>
                 </div>
                 <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                  <div className={`h-full rounded-full transition-all ${g.bar}`} style={{ width: `${Math.min(100, s.percent)}%` }} />
+                  <div
+                    className={`h-full rounded-full transition-all ${g.bar}`}
+                    style={{ width: `${Math.min(100, s.percent)}%` }}
+                  />
                 </div>
               </div>
             );

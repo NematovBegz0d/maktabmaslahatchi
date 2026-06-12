@@ -69,9 +69,4 @@ export const POSITION_MAP: Record<
   },
 };
 
-export const POSITION_ORDER: CouncilPosition[] = [
-  "chairman",
-  "deputy",
-  "secretary",
-  "member",
-];
+export const POSITION_ORDER: CouncilPosition[] = ["chairman", "deputy", "secretary", "member"];

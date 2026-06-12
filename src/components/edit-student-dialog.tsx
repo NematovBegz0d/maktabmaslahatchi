@@ -97,8 +97,7 @@ export function EditStudentDialog({ student, open, onOpenChange, onSaved }: Prop
       onSaved();
     } catch (e: unknown) {
       const err = e as { code?: string; message?: string };
-      if (err.code === "23505")
-        toast.error("Bu guvohnoma seriyasi boshqa o'quvchida band.");
+      if (err.code === "23505") toast.error("Bu guvohnoma seriyasi boshqa o'quvchida band.");
       else if (err.code === "42501" || err.code === "PGRST301")
         toast.error("Sizda bu amalni bajarish uchun ruxsat yo'q.");
       else {
@@ -121,14 +120,25 @@ export function EditStudentDialog({ student, open, onOpenChange, onSaved }: Prop
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <Label className="mb-1.5 block text-xs">To'liq ism *</Label>
-              <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Karimov Ali Vohidovich" />
+              <Input
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Karimov Ali Vohidovich"
+              />
             </div>
             <div>
               <Label className="mb-1.5 block text-xs">Guvohnoma seriyasi</Label>
-              <Input value={passport} onChange={(e) => setPassport(e.target.value)} placeholder="ibh1234567" />
+              <Input
+                value={passport}
+                onChange={(e) => setPassport(e.target.value)}
+                placeholder="ibh1234567"
+              />
               {passport.trim() && (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Login: <span className="font-mono font-semibold">{passport.toLowerCase().trim()}@edulab.uz</span>
+                  Login:{" "}
+                  <span className="font-mono font-semibold">
+                    {passport.toLowerCase().trim()}@edulab.uz
+                  </span>
                 </p>
               )}
             </div>
@@ -137,16 +147,30 @@ export function EditStudentDialog({ student, open, onOpenChange, onSaved }: Prop
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
               <Label className="mb-1.5 block text-xs">Sinf raqami</Label>
-              <Input type="number" min={1} max={11} value={classNum} onChange={(e) => setClassNum(e.target.value)} placeholder="9" />
+              <Input
+                type="number"
+                min={1}
+                max={11}
+                value={classNum}
+                onChange={(e) => setClassNum(e.target.value)}
+                placeholder="9"
+              />
             </div>
             <div>
               <Label className="mb-1.5 block text-xs">Sinf harfi</Label>
-              <Input value={classLet} onChange={(e) => setClassLet(e.target.value.toUpperCase())} placeholder="A" maxLength={2} />
+              <Input
+                value={classLet}
+                onChange={(e) => setClassLet(e.target.value.toUpperCase())}
+                placeholder="A"
+                maxLength={2}
+              />
             </div>
             <div>
               <Label className="mb-1.5 block text-xs">Jinsi</Label>
               <Select value={gender} onValueChange={setGender}>
-                <SelectTrigger><SelectValue placeholder="Tanlanmagan" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Tanlanmagan" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE}>Tanlanmagan</SelectItem>
                   <SelectItem value="male">Erkak</SelectItem>
@@ -165,11 +189,15 @@ export function EditStudentDialog({ student, open, onOpenChange, onSaved }: Prop
               <div>
                 <Label className="mb-1.5 block text-xs">Maktab</Label>
                 <Select value={schoolId} onValueChange={setSchoolId}>
-                  <SelectTrigger><SelectValue placeholder="Tanlanmagan" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tanlanmagan" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NONE}>Tanlanmagan</SelectItem>
                     {schools.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

@@ -15,22 +15,12 @@ interface ClubCardProps {
   disabled?: boolean;
 }
 
-export function ClubCard({
-  club,
-  memberCount,
-  isMember,
-  role,
-  disabled,
-}: ClubCardProps) {
+export function ClubCard({ club, memberCount, isMember, role, disabled }: ClubCardProps) {
   const { t } = useI18n();
   const colors = CLUB_COLOR_MAP[club.color as ClubColor] ?? CLUB_COLOR_MAP.blue;
-  const isAdmin = role === "admin";
+  const isStaff = role === "admin" || role === "counselor";
 
-  const ctaLabel = isAdmin
-    ? t("clubs_manage")
-    : isMember
-      ? t("clubs_details")
-      : t("clubs_view");
+  const ctaLabel = isStaff ? t("clubs_manage") : isMember ? t("clubs_details") : t("clubs_view");
 
   const inner = (
     <Card
@@ -62,7 +52,7 @@ export function ClubCard({
           </div>
 
           {/* A'zolar soni (admin uchun) */}
-          {isAdmin && memberCount !== undefined && (
+          {isStaff && memberCount !== undefined && (
             <span
               className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${colors.badge}`}
             >

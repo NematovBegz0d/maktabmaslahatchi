@@ -11,7 +11,11 @@ import { CheckCircle2, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/my-results")({
   head: () => ({ meta: [{ title: "Mening natijalarim — EduLens" }] }),
-  component: () => (<ProtectedRoute><MyResults /></ProtectedRoute>),
+  component: () => (
+    <ProtectedRoute>
+      <MyResults />
+    </ProtectedRoute>
+  ),
 });
 
 function MyResults() {
@@ -23,7 +27,9 @@ function MyResults() {
     queryFn: async () => {
       const { data } = await supabase
         .from("test_results")
-        .select("id, holland_code, personality_type, scaled_scores, raw_scores, created_at, tests(name_uz)")
+        .select(
+          "id, holland_code, personality_type, scaled_scores, raw_scores, created_at, tests(name_uz)",
+        )
         .eq("student_id", user!.id)
         .order("created_at", { ascending: false });
       return (data ?? []) as {
@@ -48,7 +54,10 @@ function MyResults() {
             <p className="mt-1 text-muted-foreground">Topshirilgan testlar va ballar</p>
           </div>
           <Button asChild variant="outline" size="sm">
-            <Link to="/my-profile"><FileText className="mr-1.5 h-4 w-4" />Portfoliom</Link>
+            <Link to="/my-profile">
+              <FileText className="mr-1.5 h-4 w-4" />
+              Portfoliom
+            </Link>
           </Button>
         </div>
 
@@ -81,7 +90,11 @@ function MyResults() {
               const scores = r.scaled_scores ?? r.raw_scores;
               const scoreEntries = scores ? Object.entries(scores) : [];
               return (
-                <Card key={r.id} className="border-border/60 transition hover:border-primary/30" style={{ boxShadow: "var(--shadow-card)" }}>
+                <Card
+                  key={r.id}
+                  className="border-border/60 transition hover:border-primary/30"
+                  style={{ boxShadow: "var(--shadow-card)" }}
+                >
                   <CardContent className="p-5">
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-success/10">
@@ -89,7 +102,9 @@ function MyResults() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className="font-semibold text-foreground">{r.tests?.name_uz ?? "Test"}</p>
+                          <p className="font-semibold text-foreground">
+                            {r.tests?.name_uz ?? "Test"}
+                          </p>
                           <p className="text-xs text-muted-foreground">
                             {new Date(r.created_at).toLocaleDateString("uz-UZ")}
                           </p>
@@ -114,15 +129,21 @@ function MyResults() {
                           <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5">
                             {scoreEntries.map(([key, val]) => (
                               <div key={key} className="flex items-center justify-between gap-2">
-                                <span className="truncate text-xs text-muted-foreground">{key}</span>
+                                <span className="truncate text-xs text-muted-foreground">
+                                  {key}
+                                </span>
                                 <div className="flex items-center gap-1.5">
                                   <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
                                     <div
                                       className="h-full rounded-full bg-primary"
-                                      style={{ width: `${Math.min(100, Math.round((val / 20) * 100))}%` }}
+                                      style={{
+                                        width: `${Math.min(100, Math.round((val / 20) * 100))}%`,
+                                      }}
                                     />
                                   </div>
-                                  <span className="w-6 text-right text-xs font-semibold text-foreground">{val}</span>
+                                  <span className="w-6 text-right text-xs font-semibold text-foreground">
+                                    {val}
+                                  </span>
                                 </div>
                               </div>
                             ))}
@@ -140,7 +161,9 @@ function MyResults() {
         {results && results.length > 0 && (
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Barcha natijalar portfolioda to'liq tahlil bilan ko'rsatiladi.{" "}
-            <Link to="/my-profile" className="text-primary hover:underline">Portfoliomga o'tish →</Link>
+            <Link to="/my-profile" className="text-primary hover:underline">
+              Portfoliomga o'tish →
+            </Link>
           </p>
         )}
       </main>

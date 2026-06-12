@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 
 interface Props {
   open: boolean;
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function AddCouncilActivityDialog({ open, onOpenChange, onAdded }: Props) {
+  const { schoolId } = useAuth();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [activityDate, setActivityDate] = useState("");
@@ -42,6 +44,8 @@ export function AddCouncilActivityDialog({ open, onOpenChange, onAdded }: Props)
         title: title.trim(),
         description: description.trim() || null,
         activity_date: activityDate || null,
+        // Maktabga bog'lash — maslahatchi RLS'i shuni talab qiladi (adminda null bo'lishi mumkin)
+        school_id: schoolId,
       });
       if (error) throw error;
       toast.success("Faoliyat qo'shildi!");
@@ -52,7 +56,10 @@ export function AddCouncilActivityDialog({ open, onOpenChange, onAdded }: Props)
       const err = e as { code?: string; message?: string };
       if (err.code === "42501" || err.code === "PGRST301")
         toast.error("Sizda bu amalni bajarish uchun ruxsat yo'q.");
-      else { console.error("[add-council-activity]", err); toast.error("Xatolik yuz berdi. Qayta urinib ko'ring."); }
+      else {
+        console.error("[add-council-activity]", err);
+        toast.error("Xatolik yuz berdi. Qayta urinib ko'ring.");
+      }
     } finally {
       setSaving(false);
     }
