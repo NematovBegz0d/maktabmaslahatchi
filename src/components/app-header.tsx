@@ -38,7 +38,8 @@ export function AppHeader() {
   // aks holda o'quvchi havolalari bir lahza "flash" qilib keyin yo'qoladi.
   const roleKnown = role !== null;
   const isAdmin = role === "admin";
-  const isStaff = role === "admin" || role === "counselor";
+  const isCounselor = role === "counselor";
+  const isStaff = isAdmin || isCounselor;
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -85,34 +86,33 @@ export function AppHeader() {
       label: t("nav_profile"),
       show: roleKnown && !isStaff,
     },
-    // Xodim: maslahatchi + super admin (faqat rol aniqlangach)
-    { to: "/students" as const, icon: Users, label: t("nav_students"), show: roleKnown && isStaff },
-    // Testlar bazasi butun platforma uchun yagona — faqat super admin boshqaradi
+    // Maslahatchi: maktab ichki ishlari (super admin bularga aralashmaydi —
+    // uning ishi /admin paneli: nazorat, to'garaklar, yangiliklar)
     {
-      to: "/tests-manage" as const,
-      icon: ClipboardList,
-      label: t("nav_tests"),
-      show: roleKnown && isAdmin,
+      to: "/students" as const,
+      icon: Users,
+      label: t("nav_students"),
+      show: roleKnown && isCounselor,
     },
-    { to: "/clubs" as const, icon: Trophy, label: t("nav_clubs"), show: roleKnown && isStaff },
+    { to: "/clubs" as const, icon: Trophy, label: t("nav_clubs"), show: roleKnown && isCounselor },
     // Maslahatchi: admindan kelgan vazifalar va xabarlar
     {
       to: "/tasks" as const,
       icon: ClipboardList,
       label: "Vazifalar",
-      show: roleKnown && role === "counselor",
+      show: roleKnown && isCounselor,
     },
     {
       to: "/council" as const,
       icon: Landmark,
       label: t("nav_council"),
-      show: roleKnown && isStaff,
+      show: roleKnown && isCounselor,
     },
     {
       to: "/analytics" as const,
       icon: TrendingUp,
       label: t("nav_analytics"),
-      show: roleKnown && isStaff,
+      show: roleKnown && isCounselor,
     },
   ].filter((l) => l.show);
 
