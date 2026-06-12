@@ -198,6 +198,47 @@ export type Database = {
         };
         Relationships: [];
       };
+      club_applications: {
+        Row: {
+          center_club_id: string | null;
+          club_name: string | null;
+          created_at: string;
+          full_name: string;
+          id: string;
+          note: string | null;
+          phone: string;
+          status: string;
+        };
+        Insert: {
+          center_club_id?: string | null;
+          club_name?: string | null;
+          created_at?: string;
+          full_name: string;
+          id?: string;
+          note?: string | null;
+          phone: string;
+          status?: string;
+        };
+        Update: {
+          center_club_id?: string | null;
+          club_name?: string | null;
+          created_at?: string;
+          full_name?: string;
+          id?: string;
+          note?: string | null;
+          phone?: string;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "club_applications_center_club_id_fkey";
+            columns: ["center_club_id"];
+            isOneToOne: false;
+            referencedRelation: "center_clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       club_members: {
         Row: {
           added_by: string | null;
@@ -1133,6 +1174,7 @@ export type Database = {
         Returns: boolean;
       };
       in_my_school: { Args: { _user_id: string }; Returns: boolean };
+      landing_stats: { Args: never; Returns: Json };
     };
     Enums: {
       app_role: "student" | "counselor" | "parent" | "admin";

@@ -157,3 +157,34 @@
     font-feature-settings: "cv11", "ss01";
   }
 }
+
+/* ─── Landing animatsiyalari ("Kelajak" markazi sahifasi) ──────────────────── */
+@keyframes landing-float {
+  0%, 100% { transform: translateY(0) rotate(var(--float-rot, 0deg)); }
+  50% { transform: translateY(-14px) rotate(var(--float-rot, 0deg)); }
+}
+@keyframes landing-float-x {
+  0%, 100% { transform: translateX(0) rotate(var(--float-rot, 0deg)); }
+  50% { transform: translateX(10px) rotate(var(--float-rot, 0deg)); }
+}
+@keyframes landing-pop {
+  0% { opacity: 0; transform: translateY(24px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes landing-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.landing-float { animation: landing-float 5s ease-in-out infinite; }
+.landing-float-slow { animation: landing-float 7s ease-in-out infinite; }
+.landing-float-x { animation: landing-float-x 6s ease-in-out infinite; }
+.landing-marquee { animation: landing-marquee 30s linear infinite; }
+.landing-marquee:hover { animation-play-state: paused; }
+
+/* Scroll-reveal: boshlang'ich yashirin, .revealed bo'lganda paydo bo'ladi */
+.reveal-init { opacity: 0; transform: translateY(28px); }
+.revealed { animation: landing-pop 0.7s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .landing-float, .landing-float-slow, .landing-float-x, .landing-marquee { animation: none; }
+  .reveal-init { opacity: 1; transform: none; }
+}

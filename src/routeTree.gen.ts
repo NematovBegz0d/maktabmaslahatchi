@@ -38,6 +38,7 @@ import { Route as AdminNewsRouteImport } from './routes/admin.news'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminCounselorsRouteImport } from './routes/admin.counselors'
 import { Route as AdminCenterClubsRouteImport } from './routes/admin.center-clubs'
+import { Route as AdminApplicationsRouteImport } from './routes/admin.applications'
 import { Route as AdminActivityRouteImport } from './routes/admin.activity'
 
 const TestsManageRoute = TestsManageRouteImport.update({
@@ -185,6 +186,11 @@ const AdminCenterClubsRoute = AdminCenterClubsRouteImport.update({
   path: '/admin/center-clubs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
+  id: '/admin/applications',
+  path: '/admin/applications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminActivityRoute = AdminActivityRouteImport.update({
   id: '/admin/activity',
   path: '/admin/activity',
@@ -207,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof TasksRoute
   '/tests-manage': typeof TestsManageRoute
   '/admin/activity': typeof AdminActivityRoute
+  '/admin/applications': typeof AdminApplicationsRoute
   '/admin/center-clubs': typeof AdminCenterClubsRoute
   '/admin/counselors': typeof AdminCounselorsRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -239,6 +246,7 @@ export interface FileRoutesByTo {
   '/tasks': typeof TasksRoute
   '/tests-manage': typeof TestsManageRoute
   '/admin/activity': typeof AdminActivityRoute
+  '/admin/applications': typeof AdminApplicationsRoute
   '/admin/center-clubs': typeof AdminCenterClubsRoute
   '/admin/counselors': typeof AdminCounselorsRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -272,6 +280,7 @@ export interface FileRoutesById {
   '/tasks': typeof TasksRoute
   '/tests-manage': typeof TestsManageRoute
   '/admin/activity': typeof AdminActivityRoute
+  '/admin/applications': typeof AdminApplicationsRoute
   '/admin/center-clubs': typeof AdminCenterClubsRoute
   '/admin/counselors': typeof AdminCounselorsRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/tests-manage'
     | '/admin/activity'
+    | '/admin/applications'
     | '/admin/center-clubs'
     | '/admin/counselors'
     | '/admin/messages'
@@ -338,6 +348,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/tests-manage'
     | '/admin/activity'
+    | '/admin/applications'
     | '/admin/center-clubs'
     | '/admin/counselors'
     | '/admin/messages'
@@ -370,6 +381,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/tests-manage'
     | '/admin/activity'
+    | '/admin/applications'
     | '/admin/center-clubs'
     | '/admin/counselors'
     | '/admin/messages'
@@ -403,6 +415,7 @@ export interface RootRouteChildren {
   TasksRoute: typeof TasksRoute
   TestsManageRoute: typeof TestsManageRoute
   AdminActivityRoute: typeof AdminActivityRoute
+  AdminApplicationsRoute: typeof AdminApplicationsRoute
   AdminCenterClubsRoute: typeof AdminCenterClubsRoute
   AdminCounselorsRoute: typeof AdminCounselorsRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
@@ -625,6 +638,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCenterClubsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/applications': {
+      id: '/admin/applications'
+      path: '/admin/applications'
+      fullPath: '/admin/applications'
+      preLoaderRoute: typeof AdminApplicationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/activity': {
       id: '/admin/activity'
       path: '/admin/activity'
@@ -651,6 +671,7 @@ const rootRouteChildren: RootRouteChildren = {
   TasksRoute: TasksRoute,
   TestsManageRoute: TestsManageRoute,
   AdminActivityRoute: AdminActivityRoute,
+  AdminApplicationsRoute: AdminApplicationsRoute,
   AdminCenterClubsRoute: AdminCenterClubsRoute,
   AdminCounselorsRoute: AdminCounselorsRoute,
   AdminMessagesRoute: AdminMessagesRoute,

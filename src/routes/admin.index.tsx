@@ -55,6 +55,18 @@ function AdminOverview() {
     },
   });
 
+  // Landing'dan kelgan yangi to'garak arizalari
+  const { data: newApplications } = useQuery({
+    queryKey: ["new-applications-count"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("club_applications")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "new");
+      return count ?? 0;
+    },
+  });
+
   const schools = stats ?? [];
   const totalResults30d = schools.reduce((a, s) => a + (s.results_30d ?? 0), 0);
   const noCounselor = schools.filter((s) => !s.counselor_id);
@@ -115,7 +127,10 @@ function AdminOverview() {
             </div>
 
             {/* ── Ogohlantirishlar ── */}
-            {(noCounselor.length > 0 || inactive.length > 0 || (pendingReviews ?? 0) > 0) && (
+            {(noCounselor.length > 0 ||
+              inactive.length > 0 ||
+              (pendingReviews ?? 0) > 0 ||
+              (newApplications ?? 0) > 0) && (
               <Card className="mb-8 border-amber-200 dark:border-amber-800">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-base text-amber-700 dark:text-amber-400">
@@ -123,6 +138,18 @@ function AdminOverview() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-1.5 text-sm">
+                  {(newApplications ?? 0) > 0 && (
+                    <p>
+                      🟣{" "}
+                      <span className="font-medium">
+                        {newApplications} ta yangi to'garak arizasi
+                      </span>{" "}
+                      kelib tushdi.{" "}
+                      <Link to="/admin/applications" className="text-primary underline">
+                        Ko'rish
+                      </Link>
+                    </p>
+                  )}
                   {(pendingReviews ?? 0) > 0 && (
                     <p>
                       🔵{" "}
