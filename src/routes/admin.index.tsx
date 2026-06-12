@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { ProtectedRoute } from "@/components/protected-route";
 import { AppHeader } from "@/components/app-header";
 import { AdminTabs } from "@/components/admin-tabs";
@@ -6,6 +7,7 @@ import { StatCard } from "@/components/stat-card";
 import { QueryError } from "@/components/query-error";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
 import { schoolStatus, useSchoolStats, DAY_MS } from "@/lib/school-stats";
 import { School, Users, ClipboardCheck, AlertTriangle, ShieldAlert } from "lucide-react";
 
@@ -30,8 +32,30 @@ function fmtDate(iso: string | null): string {
 function AdminOverview() {
   const { data: stats, isLoading, isError, refetch } = useSchoolStats();
 
+  // Maslahatchilar soni (adminning asosiy "resursi")
+  const { data: counselorCount } = useQuery({
+    queryKey: ["counselor-count"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("counselor_directory")
+        .select("id", { count: "exact", head: true });
+      return count ?? 0;
+    },
+  });
+
+  // Tekshirilishi kutilayotgan (topshirilgan) vazifalar
+  const { data: pendingReviews } = useQuery({
+    queryKey: ["pending-task-reviews"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("task_assignments")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "submitted");
+      return count ?? 0;
+    },
+  });
+
   const schools = stats ?? [];
-  const totalStudents = schools.reduce((a, s) => a + (s.student_count ?? 0), 0);
   const totalResults30d = schools.reduce((a, s) => a + (s.results_30d ?? 0), 0);
   const noCounselor = schools.filter((s) => !s.counselor_id);
   const inactive = schools.filter((s) => s.counselor_id && schoolStatus(s).rank <= 1);
@@ -70,7 +94,12 @@ function AdminOverview() {
             {/* ── KPI kartalar ── */}
             <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard label="Maktablar" value={schools.length} icon={School} accent="primary" />
-              <StatCard label="O'quvchilar" value={totalStudents} icon={Users} accent="success" />
+              <StatCard
+                label="Maslahatchilar"
+                value={counselorCount ?? 0}
+                icon={Users}
+                accent="success"
+              />
               <StatCard
                 label="Testlar (30 kun)"
                 value={totalResults30d}
@@ -79,14 +108,14 @@ function AdminOverview() {
               />
               <StatCard
                 label="E'tibor kerak"
-                value={noCounselor.length + inactive.length}
+                value={noCounselor.length + inactive.length + (pendingReviews ?? 0)}
                 icon={AlertTriangle}
                 accent="destructive"
               />
             </div>
 
             {/* ── Ogohlantirishlar ── */}
-            {(noCounselor.length > 0 || inactive.length > 0) && (
+            {(noCounselor.length > 0 || inactive.length > 0 || (pendingReviews ?? 0) > 0) && (
               <Card className="mb-8 border-amber-200 dark:border-amber-800">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-base text-amber-700 dark:text-amber-400">
@@ -94,6 +123,16 @@ function AdminOverview() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-1.5 text-sm">
+                  {(pendingReviews ?? 0) > 0 && (
+                    <p>
+                      🔵{" "}
+                      <span className="font-medium">{pendingReviews} ta topshirilgan vazifa</span>{" "}
+                      tekshirishni kutmoqda.{" "}
+                      <Link to="/admin/tasks" className="text-primary underline">
+                        Ko'rish
+                      </Link>
+                    </p>
+                  )}
                   {noCounselor.map((s) => (
                     <p key={s.id}>
                       ⚪ <span className="font-medium">{s.name}</span> — maslahatchi tayinlanmagan.{" "}
