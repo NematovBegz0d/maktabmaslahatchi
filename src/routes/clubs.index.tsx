@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { ProtectedRoute } from "@/components/protected-route";
 import { AppHeader } from "@/components/app-header";
 import { ClubCard } from "@/components/club-card";
@@ -7,11 +8,23 @@ import { StatCard } from "@/components/stat-card";
 import { QueryError } from "@/components/query-error";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/lib/i18n";
-import { CLUBS_STATIC, type Club } from "@/types/clubs";
-import { Users, Trophy, Star, BookOpen } from "lucide-react";
+import { toast } from "sonner";
+import { CLUBS_STATIC, CLUB_COLOR_MAP, type Club, type ClubColor } from "@/types/clubs";
+import { Users, Trophy, Star, BookOpen, Plus, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/clubs/")({
   head: () => ({ meta: [{ title: "Klublar — EduLens" }] }),
@@ -23,9 +36,49 @@ export const Route = createFileRoute("/clubs/")({
 });
 
 function ClubsPage() {
-  const { user, role } = useAuth();
+  const { user, role, schoolId } = useAuth();
   const { t } = useI18n();
+  const qc = useQueryClient();
   const isStaff = role === "admin" || role === "counselor";
+  // Klub yaratish faqat maktabga biriktirilganlarga (maslahatchi) — RLS ham shuni talab qiladi
+  const canCreate = role === "counselor" && !!schoolId;
+
+  const [createOpen, setCreateOpen] = useState(false);
+  const [cName, setCName] = useState("");
+  const [cIcon, setCIcon] = useState("🏆");
+  const [cColor, setCColor] = useState<ClubColor>("blue");
+  const [cFocus, setCFocus] = useState("");
+  const [cDesc, setCDesc] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  async function createClub() {
+    if (!cName.trim()) {
+      toast.error("Klub nomini kiriting");
+      return;
+    }
+    setCreating(true);
+    const { error } = await supabase.from("clubs").insert({
+      name: cName.trim(),
+      description: cDesc.trim(),
+      focus_area: cFocus.trim(),
+      icon: cIcon.trim() || "🏆",
+      color: cColor,
+      school_id: schoolId,
+    });
+    setCreating(false);
+    if (error) {
+      toast.error("Klub yaratilmadi: " + error.message);
+      return;
+    }
+    toast.success("Klub yaratildi");
+    setCreateOpen(false);
+    setCName("");
+    setCIcon("🏆");
+    setCColor("blue");
+    setCFocus("");
+    setCDesc("");
+    qc.invalidateQueries({ queryKey: ["clubs"] });
+  }
 
   // DB dan klublar (id lar bilan)
   const {
@@ -99,13 +152,20 @@ function ClubsPage() {
       <AppHeader />
       <main className="mx-auto max-w-7xl px-4 py-8">
         {/* ── Sarlavha ── */}
-        <div className="mb-8">
-          <h1 className="flex items-center gap-2 text-3xl font-bold text-foreground">
-            <Trophy className="h-7 w-7 text-primary" /> {t("clubs_title")}
-          </h1>
-          <p className="mt-1.5 text-muted-foreground">
-            {isStaff ? t("clubs_subtitle_staff") : t("clubs_subtitle_student")}
-          </p>
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="flex items-center gap-2 text-3xl font-bold text-foreground">
+              <Trophy className="h-7 w-7 text-primary" /> {t("clubs_title")}
+            </h1>
+            <p className="mt-1.5 text-muted-foreground">
+              {isStaff ? t("clubs_subtitle_staff") : t("clubs_subtitle_student")}
+            </p>
+          </div>
+          {canCreate && (
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-1.5 h-4 w-4" /> Klub qo'shish
+            </Button>
+          )}
         </div>
 
         {clubsError ? (
@@ -181,8 +241,8 @@ function ClubsPage() {
                 {/* DB bo'sh bo'lsa ogohlantirish (gridtdan oldin) */}
                 {isFallback && isStaff && (
                   <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-                    ⚠️ Klublar hali databazaga qo'shilmagan. Quyidagi klublar namuna ko'rinishida
-                    ko'rsatilmoqda. Ularni Supabase migratsiyasi orqali seed qiling.
+                    ⚠️ Maktabingizda hali klub yo'q — quyidagilar namuna. "Klub qo'shish" tugmasi
+                    orqali o'z maktabingiz klublarini yarating.
                   </div>
                 )}
 
@@ -202,6 +262,85 @@ function ClubsPage() {
             )}
           </>
         )}
+
+        {/* ── Klub yaratish dialogi (maslahatchi) ── */}
+        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Yangi klub</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-[1fr_90px]">
+                <div className="space-y-2">
+                  <Label htmlFor="club-name">
+                    Nomi <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="club-name"
+                    value={cName}
+                    onChange={(e) => setCName(e.target.value)}
+                    placeholder="Yosh fiziklar"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="club-icon">Belgi</Label>
+                  <Input
+                    id="club-icon"
+                    value={cIcon}
+                    onChange={(e) => setCIcon(e.target.value)}
+                    placeholder="🔬"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="club-focus">Yo'nalish</Label>
+                <Input
+                  id="club-focus"
+                  value={cFocus}
+                  onChange={(e) => setCFocus(e.target.value)}
+                  placeholder="Fan, Sport, San'at..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="club-desc">Tavsif</Label>
+                <Textarea
+                  id="club-desc"
+                  value={cDesc}
+                  onChange={(e) => setCDesc(e.target.value)}
+                  rows={3}
+                  placeholder="Klubda nimalar qilinadi..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Rang</Label>
+                <div className="flex flex-wrap gap-2">
+                  {(Object.keys(CLUB_COLOR_MAP) as ClubColor[]).map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setCColor(color)}
+                      aria-label={color}
+                      className={`h-8 w-8 rounded-full transition-transform ${CLUB_COLOR_MAP[color].bg} ${
+                        cColor === color
+                          ? "scale-110 ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                          : "hover:scale-105"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={creating}>
+                Bekor qilish
+              </Button>
+              <Button onClick={createClub} disabled={creating}>
+                {creating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Yaratish
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
