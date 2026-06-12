@@ -351,13 +351,20 @@ function Index() {
             </div>
           </Reveal>
 
-          {/* Gradient arklar (kamalak gardishlar) */}
-          <div aria-hidden="true" className="relative mx-auto mt-14 h-44 max-w-3xl md:h-56">
-            <div className="absolute inset-x-0 bottom-0 mx-auto h-[340px] w-[340px] rounded-full bg-violet-200/60 md:h-[460px] md:w-[460px]" />
-            <div className="absolute inset-x-0 bottom-0 mx-auto h-[260px] w-[260px] rounded-full bg-violet-300/50 md:h-[360px] md:w-[360px]" />
-            <div className="absolute inset-x-0 bottom-0 mx-auto h-[180px] w-[180px] rounded-full bg-violet-400/40 md:h-[260px] md:w-[260px]" />
-            <div className="absolute inset-x-0 bottom-4 mx-auto flex items-end justify-center text-7xl md:bottom-6 md:text-8xl">
-              <span className="landing-float-slow inline-block">🧑‍🎓</span>
+          {/* Kamalak arklar — pastdan ko'tarilgan yarim doiralar.
+              Doira markazi konteyner pastki chetida (translate-y-1/2), ortig'i
+              overflow-hidden bilan kesiladi — tepadagi tugmalarga chiqmaydi. */}
+          <div
+            aria-hidden="true"
+            className="relative mx-auto mt-12 h-52 w-full max-w-3xl overflow-hidden md:h-72"
+          >
+            <div className="absolute bottom-0 left-1/2 h-[480px] w-[480px] -translate-x-1/2 translate-y-1/2 rounded-full bg-violet-200/70 md:h-[680px] md:w-[680px]" />
+            <div className="absolute bottom-0 left-1/2 h-[340px] w-[340px] -translate-x-1/2 translate-y-1/2 rounded-full bg-violet-300/60 md:h-[480px] md:w-[480px]" />
+            <div className="absolute bottom-0 left-1/2 h-[210px] w-[210px] -translate-x-1/2 translate-y-1/2 rounded-full bg-violet-400/50 md:h-[300px] md:w-[300px]" />
+            <div className="absolute inset-x-0 bottom-0 flex justify-center">
+              <span className="landing-float-slow inline-block text-8xl drop-shadow-lg md:text-9xl">
+                🧑‍🎓
+              </span>
             </div>
           </div>
         </section>
