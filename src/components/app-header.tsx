@@ -21,6 +21,7 @@ import {
   Activity,
   Landmark,
   Shield,
+  Newspaper,
 } from "lucide-react";
 
 const NAV_LINK =
@@ -52,8 +53,45 @@ export function AppHeader() {
 
   // Nav havolalari ro'yxati — rol bo'yicha
   const navLinks = [
-    // Super admin uchun boshqaruv paneli
-    { to: "/admin" as const, icon: Shield, label: "Boshqaruv", show: roleKnown && isAdmin },
+    // Super admin: asosiy bo'limlar to'g'ridan-to'g'ri navbarda
+    // (qolganlari — Maktablar, Xabarlar, Jurnal — /admin ichidagi tablarda)
+    {
+      to: "/admin" as const,
+      icon: Shield,
+      label: "Boshqaruv",
+      show: roleKnown && isAdmin,
+      exact: true,
+    },
+    {
+      to: "/admin/counselors" as const,
+      icon: Users,
+      label: "Maslahatchilar",
+      show: roleKnown && isAdmin,
+    },
+    {
+      to: "/admin/tasks" as const,
+      icon: ClipboardList,
+      label: "Vazifalar",
+      show: roleKnown && isAdmin,
+    },
+    {
+      to: "/admin/news" as const,
+      icon: Newspaper,
+      label: "Yangiliklar",
+      show: roleKnown && isAdmin,
+    },
+    {
+      to: "/admin/center-clubs" as const,
+      icon: Landmark,
+      label: "To'garaklar",
+      show: roleKnown && isAdmin,
+    },
+    {
+      to: "/admin/rating" as const,
+      icon: Trophy,
+      label: "Reyting",
+      show: roleKnown && isAdmin,
+    },
     {
       to: "/dashboard" as const,
       icon: LayoutDashboard,
@@ -125,10 +163,11 @@ export function AppHeader() {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-1 md:flex" aria-label="Asosiy navigatsiya">
-          {navLinks.map(({ to, icon: Icon, label }) => (
+          {navLinks.map(({ to, icon: Icon, label, exact }) => (
             <Link
               key={to}
               to={to}
+              activeOptions={{ exact: exact ?? false }}
               className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
               activeProps={{
                 className: "rounded-lg px-3 py-2 text-sm font-medium bg-accent text-foreground",
@@ -191,10 +230,11 @@ export function AppHeader() {
                 <Logo />
               </div>
               <nav className="flex flex-col gap-1 p-3" aria-label="Mobil navigatsiya">
-                {navLinks.map(({ to, icon: Icon, label }) => (
+                {navLinks.map(({ to, icon: Icon, label, exact }) => (
                   <Link
                     key={to}
                     to={to}
+                    activeOptions={{ exact: exact ?? false }}
                     className={NAV_LINK}
                     activeProps={{ className: NAV_LINK_ACTIVE }}
                     onClick={() => setOpen(false)}
