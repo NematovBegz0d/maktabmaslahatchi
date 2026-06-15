@@ -17,6 +17,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { taskStatusBadge, logClientActivity } from "@/lib/tasks";
 import { useSchoolStats } from "@/lib/school-stats";
@@ -102,10 +103,9 @@ function CounselorTasks() {
     queryKey: ["my-message-reads", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("message_reads")
-        .select("message_id")
-        .eq("user_id", user!.id);
+      const data = unwrap(
+        await supabase.from("message_reads").select("message_id").eq("user_id", user!.id),
+      );
       return new Set((data ?? []).map((r) => r.message_id));
     },
   });
@@ -134,10 +134,9 @@ function CounselorTasks() {
     queryKey: ["my-task-stats", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("task_assignments")
-        .select("status")
-        .eq("counselor_id", user!.id);
+      const data = unwrap(
+        await supabase.from("task_assignments").select("status").eq("counselor_id", user!.id),
+      );
       const assigned = (data ?? []).length;
       const accepted = (data ?? []).filter((a) => a.status === "accepted").length;
       return { assigned, accepted };

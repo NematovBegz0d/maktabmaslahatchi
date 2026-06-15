@@ -27,6 +27,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   CalendarDays,
@@ -222,12 +223,14 @@ function Index() {
   const { data: centerClubs } = useQuery({
     queryKey: ["landing-center-clubs"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("center_clubs")
-        .select("id, name, description, icon, image_url, schedule, age_range, teacher")
-        .eq("is_published", true)
-        .order("sort_order")
-        .order("created_at");
+      const data = unwrap(
+        await supabase
+          .from("center_clubs")
+          .select("id, name, description, icon, image_url, schedule, age_range, teacher")
+          .eq("is_published", true)
+          .order("sort_order")
+          .order("created_at"),
+      );
       return (data ?? []) as CenterClub[];
     },
     staleTime: 1000 * 60 * 5,
@@ -237,12 +240,14 @@ function Index() {
   const { data: news } = useQuery({
     queryKey: ["landing-news"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("news")
-        .select("id, title, excerpt, body, cover_url, published_at")
-        .eq("status", "published")
-        .order("published_at", { ascending: false })
-        .limit(3);
+      const data = unwrap(
+        await supabase
+          .from("news")
+          .select("id, title, excerpt, body, cover_url, published_at")
+          .eq("status", "published")
+          .order("published_at", { ascending: false })
+          .limit(3),
+      );
       return (data ?? []) as NewsItem[];
     },
     staleTime: 1000 * 60 * 5,
@@ -252,7 +257,7 @@ function Index() {
   const { data: stats } = useQuery({
     queryKey: ["landing-stats"],
     queryFn: async () => {
-      const { data } = await supabase.rpc("landing_stats");
+      const data = unwrap(await supabase.rpc("landing_stats"));
       return (data ?? {}) as {
         schools?: number;
         students?: number;

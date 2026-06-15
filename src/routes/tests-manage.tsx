@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   ClipboardList,
@@ -69,12 +70,14 @@ function TestsManage() {
   const { data: tests, isLoading } = useQuery({
     queryKey: ["manage-tests"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("tests")
-        .select(
-          "id, name_uz, description, category, test_type, question_count, duration_minutes, is_active",
-        )
-        .order("name_uz");
+      const data = unwrap(
+        await supabase
+          .from("tests")
+          .select(
+            "id, name_uz, description, category, test_type, question_count, duration_minutes, is_active",
+          )
+          .order("name_uz"),
+      );
       return (data ?? []) as TestRow[];
     },
   });
@@ -416,11 +419,13 @@ function QuestionEditor({
   const { data: questions, isLoading } = useQuery({
     queryKey: ["manage-questions", testId],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("questions")
-        .select("id, question_number, question_text_uz, subscale, options")
-        .eq("test_id", testId)
-        .order("question_number");
+      const data = unwrap(
+        await supabase
+          .from("questions")
+          .select("id, question_number, question_text_uz, subscale, options")
+          .eq("test_id", testId)
+          .order("question_number"),
+      );
       return (data ?? []) as unknown as QuestionRow[];
     },
   });
@@ -431,10 +436,12 @@ function QuestionEditor({
     queryKey: ["manage-keys", testId, qIds.length],
     enabled: isKnowledge && qIds.length > 0,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("question_answer_keys")
-        .select("question_id, correct_answer")
-        .in("question_id", qIds);
+      const data = unwrap(
+        await supabase
+          .from("question_answer_keys")
+          .select("question_id, correct_answer")
+          .in("question_id", qIds),
+      );
       const map: Record<string, number> = {};
       (data ?? []).forEach((k) => {
         const v = (k.correct_answer as { v?: number })?.v;

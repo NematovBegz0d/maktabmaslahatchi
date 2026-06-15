@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Logo } from "@/components/logo";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft } from "lucide-react";
 import type { NewsItem } from "./index";
@@ -18,12 +19,14 @@ function NewsDetail() {
   const { data: item, isLoading } = useQuery({
     queryKey: ["public-news-item", id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("news")
-        .select("id, title, excerpt, body, cover_url, published_at")
-        .eq("id", id)
-        .eq("status", "published")
-        .maybeSingle();
+      const data = unwrap(
+        await supabase
+          .from("news")
+          .select("id, title, excerpt, body, cover_url, published_at")
+          .eq("id", id)
+          .eq("status", "published")
+          .maybeSingle(),
+      );
       return data as NewsItem | null;
     },
   });

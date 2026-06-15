@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 
 export interface StudentEditData {
   id: string;
@@ -53,7 +54,7 @@ export function EditStudentDialog({ student, open, onOpenChange, onSaved }: Prop
   const { data: schools = [] } = useQuery({
     queryKey: ["schools"],
     queryFn: async () => {
-      const { data } = await supabase.from("schools").select("id, name").order("name");
+      const data = unwrap(await supabase.from("schools").select("id, name").order("name"));
       return (data ?? []) as { id: string; name: string }[];
     },
     staleTime: 1000 * 60 * 30,

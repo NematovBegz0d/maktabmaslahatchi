@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { logClientActivity } from "@/lib/tasks";
 import { toast } from "sonner";
@@ -41,10 +42,12 @@ function AdminMessages() {
   const { data: counselors = [] } = useQuery({
     queryKey: ["counselor-directory"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("counselor_directory")
-        .select("id, full_name, school_name")
-        .order("full_name");
+      const data = unwrap(
+        await supabase
+          .from("counselor_directory")
+          .select("id, full_name, school_name")
+          .order("full_name"),
+      );
       return (data ?? []) as { id: string; full_name: string | null; school_name: string | null }[];
     },
   });
@@ -72,7 +75,7 @@ function AdminMessages() {
     queryKey: ["admin-message-reads"],
     enabled: (messages ?? []).length > 0,
     queryFn: async () => {
-      const { data } = await supabase.from("message_reads").select("message_id");
+      const data = unwrap(await supabase.from("message_reads").select("message_id"));
       const counts: Record<string, number> = {};
       (data ?? []).forEach((r) => {
         counts[r.message_id] = (counts[r.message_id] ?? 0) + 1;

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Search, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { POSITION_MAP, POSITION_ORDER, type CouncilPosition } from "@/types/council";
 
@@ -54,10 +55,12 @@ export function AddCouncilMemberDialog({
     queryKey: ["students-for-council"],
     enabled: open,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("student_directory")
-        .select("id, full_name, class_number, class_letter")
-        .order("full_name", { ascending: true });
+      const data = unwrap(
+        await supabase
+          .from("student_directory")
+          .select("id, full_name, class_number, class_letter")
+          .order("full_name", { ascending: true }),
+      );
       // View tiplari nullable — id real hayotda doim mavjud (profiles.id PK)
       return (data ?? []) as {
         id: string;

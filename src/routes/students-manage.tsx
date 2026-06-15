@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import {
@@ -131,7 +132,7 @@ function useSchools(enabled: boolean) {
     queryKey: ["schools"],
     enabled,
     queryFn: async () => {
-      const { data } = await supabase.from("schools").select("id, name").order("name");
+      const data = unwrap(await supabase.from("schools").select("id, name").order("name"));
       return (data ?? []) as { id: string; name: string }[];
     },
     staleTime: 1000 * 60 * 30,

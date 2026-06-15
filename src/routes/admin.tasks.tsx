@@ -19,6 +19,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { taskStatusBadge, logClientActivity } from "@/lib/tasks";
 import { toast } from "sonner";
@@ -59,10 +60,12 @@ function AdminTasks() {
   const { data: counselors = [] } = useQuery({
     queryKey: ["counselor-directory"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("counselor_directory")
-        .select("id, full_name, school_name, is_active")
-        .order("full_name");
+      const data = unwrap(
+        await supabase
+          .from("counselor_directory")
+          .select("id, full_name, school_name, is_active")
+          .order("full_name"),
+      );
       return (data ?? []) as {
         id: string;
         full_name: string | null;

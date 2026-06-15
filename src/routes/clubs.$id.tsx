@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/lib/i18n";
 import { CLUB_COLOR_MAP, type ClubColor, type ClubMemberWithProfile } from "@/types/clubs";
@@ -111,10 +112,12 @@ function ClubDetailPage() {
     queryKey: ["students-for-clubs"],
     enabled: isStaff,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("student_directory")
-        .select("id, full_name, class_number, class_letter")
-        .order("full_name", { ascending: true });
+      const data = unwrap(
+        await supabase
+          .from("student_directory")
+          .select("id, full_name, class_number, class_letter")
+          .order("full_name", { ascending: true }),
+      );
       // View tiplari nullable — id real hayotda doim mavjud (profiles.id PK)
       return (data ?? []) as {
         id: string;

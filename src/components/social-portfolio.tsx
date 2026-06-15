@@ -10,6 +10,7 @@ import { AddAchievementDialog } from "@/components/add-achievement-dialog";
 import { AddEnrollmentDialog } from "@/components/add-enrollment-dialog";
 import { ClubBadge } from "@/components/club-badge";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
 import {
   ENROLLMENT_STATUS_MAP,
@@ -46,10 +47,12 @@ export function SocialPortfolio({ studentId, canEdit }: SocialPortfolioProps) {
   const { data: clubs } = useQuery({
     queryKey: ["sp-clubs", studentId],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("club_members")
-        .select("id, joined_at, clubs(id, name, icon, color)")
-        .eq("student_id", studentId);
+      const data = unwrap(
+        await supabase
+          .from("club_members")
+          .select("id, joined_at, clubs(id, name, icon, color)")
+          .eq("student_id", studentId),
+      );
       return (data ?? []) as unknown as {
         id: string;
         joined_at: string;

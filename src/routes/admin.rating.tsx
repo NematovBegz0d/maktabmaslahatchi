@@ -7,6 +7,7 @@ import { QueryError } from "@/components/query-error";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useSchoolStats } from "@/lib/school-stats";
 import { computeRating, rankEmoji, type TaskStats } from "@/lib/rating";
 import { Trophy } from "lucide-react";
@@ -27,7 +28,7 @@ function AdminRating() {
   const { data: taskStats } = useQuery({
     queryKey: ["task-stats"],
     queryFn: async () => {
-      const { data } = await supabase.from("task_assignments").select("counselor_id, status");
+      const data = unwrap(await supabase.from("task_assignments").select("counselor_id, status"));
       const map: Record<string, TaskStats> = {};
       (data ?? []).forEach((a) => {
         const entry = (map[a.counselor_id] ??= { assigned: 0, accepted: 0 });

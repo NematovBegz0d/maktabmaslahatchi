@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { ScrollText, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/admin/activity")({
@@ -56,7 +57,7 @@ function AdminActivity() {
   const { data: schools = [] } = useQuery({
     queryKey: ["schools"],
     queryFn: async () => {
-      const { data } = await supabase.from("schools").select("id, name").order("name");
+      const data = unwrap(await supabase.from("schools").select("id, name").order("name"));
       return (data ?? []) as { id: string; name: string }[];
     },
     staleTime: 1000 * 60 * 30,

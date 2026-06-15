@@ -20,6 +20,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
@@ -103,7 +104,7 @@ function ClubsPage() {
     queryKey: ["club-member-counts"],
     enabled: !!clubs && clubs.length > 0,
     queryFn: async () => {
-      const { data } = await supabase.from("club_members").select("club_id");
+      const data = unwrap(await supabase.from("club_members").select("club_id"));
       const counts: Record<string, number> = {};
       (data ?? []).forEach((row) => {
         counts[row.club_id] = (counts[row.club_id] ?? 0) + 1;
@@ -117,10 +118,9 @@ function ClubsPage() {
     queryKey: ["my-club-memberships", user?.id],
     enabled: !!user && !isStaff,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("club_members")
-        .select("club_id")
-        .eq("student_id", user!.id);
+      const data = unwrap(
+        await supabase.from("club_members").select("club_id").eq("student_id", user!.id),
+      );
       return new Set((data ?? []).map((r) => r.club_id));
     },
   });
