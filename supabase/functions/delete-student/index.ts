@@ -3,7 +3,7 @@
 //   counselor — FAQAT o'z maktabidagi o'quvchini o'chira oladi
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
-import { adminClient, getCaller, logActivity } from "../_shared/auth.ts";
+import { adminClient, getCaller, logActivity, withinRateLimit } from "../_shared/auth.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -13,6 +13,14 @@ Deno.serve(async (req: Request) => {
   if (!caller) return jsonResponse({ error: "Unauthorized" }, 401);
   if (caller.role !== "admin" && caller.role !== "counselor") {
     return jsonResponse({ error: "Forbidden: faqat maslahatchi yoki admin" }, 403);
+  }
+
+  // Rate-limit: soatiga 60 ta o'chirish
+  if (!(await withinRateLimit(admin, caller.id, "student_deleted", 60))) {
+    return jsonResponse(
+      { error: "Juda ko'p so'rov. Bir soatdan so'ng qayta urinib ko'ring." },
+      429,
+    );
   }
 
   let body: Record<string, string>;

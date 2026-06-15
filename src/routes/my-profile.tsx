@@ -13,6 +13,8 @@ import { QueryError } from "@/components/query-error";
 import { PortfolioSkeleton } from "@/components/portfolio-skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { iqLabel, RADAR_COLORS } from "@/lib/profile-display";
+import { IqDisclaimer } from "@/components/iq-disclaimer";
 import {
   Radar,
   RadarChart,
@@ -118,17 +120,7 @@ const TEMP_INFO: Record<string, { emoji: string; desc: string; strong: string; d
     },
   };
 
-// ─── IQ interpretatsiya ────────────────────────────────────────────────────
-function iqLabel(score: number) {
-  if (score >= 130) return { text: "A'lo darajali", color: "text-purple-600" };
-  if (score >= 115) return { text: "Yuqori", color: "text-blue-600" };
-  if (score >= 100) return { text: "O'rtadan yuqori", color: "text-green-600" };
-  if (score >= 85) return { text: "O'rtacha", color: "text-yellow-600" };
-  return { text: "Rivojlantirilishi kerak", color: "text-red-500" };
-}
-
-// ─── Radar rangi ──────────────────────────────────────────────────────────
-const RADAR_COLORS = ["#2563EB", "#7C3AED", "#10B981", "#F59E0B", "#EF4444", "#06B6D4"];
+// iqLabel va RADAR_COLORS endi @/lib/profile-display'dan import qilinadi (takror emas)
 
 interface RadarItem {
   skill: string;
@@ -287,13 +279,23 @@ function MyProfile() {
 
   async function generateAI() {
     setAiBusy(true);
-    const { error } = await supabase.functions.invoke("analyze-profile", { body: {} });
+    const { data, error } = await supabase.functions.invoke("analyze-profile", { body: {} });
     setAiBusy(false);
     if (error) {
-      toast.error("AI tahlilni yaratib bo'lmadi");
+      // Funksiya xato matnini (masalan, kunlik limit — 429) o'qib ko'rsatamiz
+      let msg = "AI tahlilni yaratib bo'lmadi";
+      try {
+        const detail = await (error as { context?: Response }).context?.json();
+        if (detail?.error) msg = detail.error;
+      } catch {
+        /* javob JSON bo'lmasa umumiy xabar qoladi */
+      }
+      toast.error(msg);
       return;
     }
-    toast.success("AI tahlil tayyor!");
+    toast.success(
+      (data as { cached?: boolean })?.cached ? "Tahlil yangilandi" : "AI tahlil tayyor!",
+    );
     queryClient.invalidateQueries({ queryKey: ["student-profile", user?.id] });
   }
 
@@ -585,6 +587,7 @@ function MyProfile() {
                   })}
                 </div>
               </div>
+              <IqDisclaimer />
             </CardContent>
           </Card>
         )}

@@ -10,6 +10,7 @@ import {
   getCaller,
   logActivity,
   toSystemEmail,
+  withinRateLimit,
 } from "../_shared/auth.ts";
 
 interface Body {
@@ -28,6 +29,14 @@ Deno.serve(async (req: Request) => {
   if (!caller) return jsonResponse({ error: "Unauthorized" }, 401);
   if (caller.role !== "admin") {
     return jsonResponse({ error: "Forbidden: faqat super admin" }, 403);
+  }
+
+  // Rate-limit: soatiga 30 ta maslahatchi yaratish
+  if (!(await withinRateLimit(admin, caller.id, "counselor_created", 30))) {
+    return jsonResponse(
+      { error: "Juda ko'p so'rov. Bir soatdan so'ng qayta urinib ko'ring." },
+      429,
+    );
   }
 
   let body: Body;

@@ -2,7 +2,8 @@
 // chaqiruvchini aniqlash, rolini tekshirish, faoliyat jurnaliga yozish.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-export type AppRole = "admin" | "counselor" | "student" | "parent";
+// 'parent' DB enum'ida bor, lekin ishlatilmaydi — TS modeliga kiritmaymiz
+export type AppRole = "admin" | "counselor" | "student";
 
 export interface Caller {
   id: string;
@@ -75,6 +76,27 @@ export async function logActivity(
     details: entry.details ?? null,
   });
   if (error) console.error("[activity_log] yozib bo'lmadi:", error.message);
+}
+
+// Oddiy oynali rate-limit. Chaqiruvchi `windowMinutes` ichida `actions` turidagi
+// amallarni `maxPerWindow` martadan ko'p bajarmaganini activity_log orqali tekshiradi.
+// Limitdan oshmagan bo'lsa true (ruxsat) qaytaradi.
+export async function withinRateLimit(
+  admin: AdminClient,
+  actorId: string,
+  actions: string | string[],
+  maxPerWindow: number,
+  windowMinutes = 60,
+): Promise<boolean> {
+  const since = new Date(Date.now() - windowMinutes * 60 * 1000).toISOString();
+  const list = Array.isArray(actions) ? actions : [actions];
+  const { count } = await admin
+    .from("activity_log")
+    .select("id", { count: "exact", head: true })
+    .eq("actor_id", actorId)
+    .in("action", list)
+    .gte("created_at", since);
+  return (count ?? 0) < maxPerWindow;
 }
 
 // O'qilishi oson parol: adashtiruvchi belgilar (0/O, 1/l/I) yo'q

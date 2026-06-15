@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import {
   ClipboardList,
@@ -88,11 +89,9 @@ function StudentDashboard() {
     queryKey: ["profile", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", user!.id)
-        .maybeSingle();
+      const data = unwrap(
+        await supabase.from("profiles").select("full_name").eq("id", user!.id).maybeSingle(),
+      );
       return data;
     },
   });
@@ -101,11 +100,13 @@ function StudentDashboard() {
     queryKey: ["sessions", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("test_sessions")
-        .select("id, status, test_id, tests(name_uz, description)")
-        .eq("student_id", user!.id)
-        .order("started_at", { ascending: false });
+      const data = unwrap(
+        await supabase
+          .from("test_sessions")
+          .select("id, status, test_id, tests(name_uz, description)")
+          .eq("student_id", user!.id)
+          .order("started_at", { ascending: false }),
+      );
       return (data ?? []) as SessionWithTest[];
     },
   });
@@ -113,7 +114,9 @@ function StudentDashboard() {
   const { data: tests } = useQuery({
     queryKey: ["tests-active"],
     queryFn: async () => {
-      const { data } = await supabase.from("tests").select("*").eq("is_active", true).order("id");
+      const data = unwrap(
+        await supabase.from("tests").select("*").eq("is_active", true).order("id"),
+      );
       return (data ?? []) as DashTest[];
     },
   });
@@ -122,11 +125,13 @@ function StudentDashboard() {
     queryKey: ["sp-completeness", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("student_profiles")
-        .select("profile_completeness, top_careers")
-        .eq("student_id", user!.id)
-        .maybeSingle();
+      const data = unwrap(
+        await supabase
+          .from("student_profiles")
+          .select("profile_completeness, top_careers")
+          .eq("student_id", user!.id)
+          .maybeSingle(),
+      );
       return data;
     },
   });
@@ -305,10 +310,12 @@ function AdminDashboard() {
     queryKey: ["admin-students"],
     queryFn: async () => {
       // student_directory — faqat 'student' rolli profillar (admin/maslahatchi chiqarib tashlangan)
-      const { data } = await supabase
-        .from("student_directory")
-        .select("id, full_name, class_number, class_letter, created_at")
-        .order("created_at", { ascending: false });
+      const data = unwrap(
+        await supabase
+          .from("student_directory")
+          .select("id, full_name, class_number, class_letter, created_at")
+          .order("created_at", { ascending: false }),
+      );
       return (data ?? []) as AdminStudent[];
     },
   });
@@ -316,11 +323,13 @@ function AdminDashboard() {
   const { data: sessions } = useQuery({
     queryKey: ["admin-sessions"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("test_sessions")
-        .select("id, student_id, status, started_at, completed_at, tests(name_uz)")
-        .order("started_at", { ascending: false })
-        .limit(8);
+      const data = unwrap(
+        await supabase
+          .from("test_sessions")
+          .select("id, student_id, status, started_at, completed_at, tests(name_uz)")
+          .order("started_at", { ascending: false })
+          .limit(8),
+      );
       return (data ?? []) as SessionWithTest[];
     },
   });
@@ -328,9 +337,9 @@ function AdminDashboard() {
   const { data: spData } = useQuery({
     queryKey: ["admin-sp"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("student_profiles")
-        .select("student_id, profile_completeness");
+      const data = unwrap(
+        await supabase.from("student_profiles").select("student_id, profile_completeness"),
+      );
       return data ?? [];
     },
   });
@@ -338,7 +347,7 @@ function AdminDashboard() {
   const { data: tests } = useQuery({
     queryKey: ["tests-active"],
     queryFn: async () => {
-      const { data } = await supabase.from("tests").select("id, name_uz").eq("is_active", true);
+      const data = unwrap(await supabase.from("tests").select("id, name_uz").eq("is_active", true));
       return data ?? [];
     },
   });

@@ -6,6 +6,7 @@ import { StatCard } from "@/components/stat-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import {
   ResponsiveContainer,
   BarChart,
@@ -73,10 +74,12 @@ function Analytics() {
     queryKey: ["analytics-students"],
     queryFn: async () => {
       // student_directory — faqat 'student' rolli profillar (admin sana' ga kirmaydi)
-      const { data } = await supabase
-        .from("student_directory")
-        .select("id, class_number")
-        .not("class_number", "is", null);
+      const data = unwrap(
+        await supabase
+          .from("student_directory")
+          .select("id, class_number")
+          .not("class_number", "is", null),
+      );
       return data ?? [];
     },
   });
@@ -88,9 +91,11 @@ function Analytics() {
   } = useQuery({
     queryKey: ["analytics-results"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("test_results")
-        .select("holland_code, personality_type, test_id, tests(name_uz)");
+      const data = unwrap(
+        await supabase
+          .from("test_results")
+          .select("holland_code, personality_type, test_id, tests(name_uz)"),
+      );
       return (data ?? []) as ResultRow[];
     },
   });
@@ -102,9 +107,9 @@ function Analytics() {
   } = useQuery({
     queryKey: ["analytics-profiles"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("student_profiles")
-        .select("profile_completeness, top_careers");
+      const data = unwrap(
+        await supabase.from("student_profiles").select("profile_completeness, top_careers"),
+      );
       return (data ?? []) as SpRow[];
     },
   });
@@ -112,9 +117,9 @@ function Analytics() {
   const { data: subjectRows } = useQuery({
     queryKey: ["analytics-subjects"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("test_results")
-        .select("scaled_scores, tests(name_uz, test_type)");
+      const data = unwrap(
+        await supabase.from("test_results").select("scaled_scores, tests(name_uz, test_type)"),
+      );
       return ((data ?? []) as unknown as SubjectRow[]).filter(
         (r) => r.tests?.test_type === "subject",
       );

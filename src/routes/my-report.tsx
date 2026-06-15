@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AISummary } from "@/components/ai-summary";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { IqDisclaimer } from "@/components/iq-disclaimer";
 import {
   Radar,
   RadarChart,
@@ -306,6 +307,7 @@ function MyReport() {
                       </p>
                     ))}
                   </div>
+                  <IqDisclaimer />
                 </div>
               )}
             </div>

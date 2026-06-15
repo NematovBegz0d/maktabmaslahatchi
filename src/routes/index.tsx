@@ -260,7 +260,7 @@ function Index() {
         tests?: number;
       };
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 30, // jamlama raqamlar kam o'zgaradi — 30 daqiqa kesh
   });
 
   // Qiziqish bildirish dialogi
@@ -771,16 +771,27 @@ function ApplyDialog({ club, onClose }: { club: CenterClub | null; onClose: () =
       return;
     }
     setSending(true);
-    const { error } = await supabase.from("club_applications").insert({
-      center_club_id: club?.id ?? null,
-      club_name: club?.name ?? null,
-      full_name: fullName.trim(),
-      phone: phone.trim(),
-      note: note.trim() || null,
+    // Arizalar throttle'li edge-funksiya orqali yuboriladi (anon spam'dan himoya)
+    const { error } = await supabase.functions.invoke("submit-application", {
+      body: {
+        center_club_id: club?.id ?? null,
+        club_name: club?.name ?? null,
+        full_name: fullName.trim(),
+        phone: phone.trim(),
+        note: note.trim() || null,
+      },
     });
     setSending(false);
     if (error) {
-      toast.error("Yuborilmadi — birozdan keyin qayta urinib ko'ring");
+      // Funksiya throttle xatosini (429) o'qib ko'rsatamiz
+      let msg = "Yuborilmadi — birozdan keyin qayta urinib ko'ring";
+      try {
+        const detail = await (error as { context?: Response }).context?.json();
+        if (detail?.error) msg = detail.error;
+      } catch {
+        /* javob JSON bo'lmasa umumiy xabar qoladi */
+      }
+      toast.error(msg);
       return;
     }
     setSent(true);

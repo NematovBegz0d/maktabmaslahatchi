@@ -20,6 +20,7 @@ import {
   getCaller,
   logActivity,
   toSystemEmail,
+  withinRateLimit,
 } from "../_shared/auth.ts";
 
 const MAX_BATCH = 100;
@@ -57,6 +58,14 @@ Deno.serve(async (req: Request) => {
   if (!caller) return jsonResponse({ error: "Unauthorized" }, 401);
   if (caller.role !== "admin" && caller.role !== "counselor") {
     return jsonResponse({ error: "Forbidden: faqat maslahatchi yoki admin" }, 403);
+  }
+
+  // Rate-limit: soatiga 40 ta import amali (har amal 100 tagacha o'quvchi yaratishi mumkin)
+  if (!(await withinRateLimit(admin, caller.id, ["student_created", "students_imported"], 40))) {
+    return jsonResponse(
+      { error: "Juda ko'p so'rov. Bir soatdan so'ng qayta urinib ko'ring." },
+      429,
+    );
   }
 
   let body: { school_id?: string; students?: StudentInput[] };

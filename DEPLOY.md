@@ -41,7 +41,7 @@ npm install -g supabase
 
 # Loyihaga ulanish (project_id config.toml'da bor)
 supabase login
-supabase link --project-ref avfehwaamhzcydpbuitt
+supabase link --project-ref irkoxlxdpkisfvwtxsga
 ```
 
 ### Migratsiyani qoʻllash (savollar + kalitlar)
@@ -64,7 +64,7 @@ supabase functions deploy complete-session
 
 `.env` faylida quyidagilar boʻlishi kerak (Lovable avtomatik qoʻyadi):
 ```
-VITE_SUPABASE_URL=https://avfehwaamhzcydpbuitt.supabase.co
+VITE_SUPABASE_URL=https://irkoxlxdpkisfvwtxsga.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=<anon public key>
 ```
 

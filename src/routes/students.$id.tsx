@@ -14,6 +14,8 @@ import { SocialPortfolio } from "@/components/social-portfolio";
 import { EditStudentDialog } from "@/components/edit-student-dialog";
 import { SubjectResults, type SubjectResult } from "@/components/subject-results";
 import { supabase } from "@/integrations/supabase/client";
+import { iqLabel, RADAR_COLORS } from "@/lib/profile-display";
+import { IqDisclaimer } from "@/components/iq-disclaimer";
 import {
   Radar,
   RadarChart,
@@ -95,15 +97,7 @@ const TEMP_INFO: Record<string, { emoji: string; desc: string; strong: string; d
     },
   };
 
-const RADAR_COLORS = ["#2563EB", "#7C3AED", "#10B981", "#F59E0B", "#EF4444", "#06B6D4"];
-
-function iqLabel(score: number) {
-  if (score >= 130) return { text: "A'lo darajali", color: "text-purple-600" };
-  if (score >= 115) return { text: "Yuqori", color: "text-blue-600" };
-  if (score >= 100) return { text: "O'rtadan yuqori", color: "text-green-600" };
-  if (score >= 85) return { text: "O'rtacha", color: "text-yellow-600" };
-  return { text: "Rivojlantirilishi kerak", color: "text-red-500" };
-}
+// iqLabel va RADAR_COLORS endi @/lib/profile-display'dan import qilinadi (takror emas)
 
 interface RadarItem {
   skill: string;
@@ -594,6 +588,7 @@ function StudentDetail() {
                   })}
                 </div>
               </div>
+              <IqDisclaimer />
             </CardContent>
           </Card>
         )}
