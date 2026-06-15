@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QueryError } from "@/components/query-error";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/lib/i18n";
 import { CLUB_COLOR_MAP, type ClubColor, type Club, type MembershipWithClub } from "@/types/clubs";
@@ -49,10 +50,9 @@ function MyClubsPage() {
   const { data: allClubs } = useQuery({
     queryKey: ["clubs"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("clubs")
-        .select("*")
-        .order("created_at", { ascending: true });
+      const data = unwrap(
+        await supabase.from("clubs").select("*").order("created_at", { ascending: true }),
+      );
       return (data ?? []) as Club[];
     },
   });

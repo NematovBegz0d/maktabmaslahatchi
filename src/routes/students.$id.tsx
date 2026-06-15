@@ -15,6 +15,7 @@ import { EditStudentDialog } from "@/components/edit-student-dialog";
 import { SubjectResults, type SubjectResult } from "@/components/subject-results";
 import { supabase } from "@/integrations/supabase/client";
 import { iqLabel, RADAR_COLORS } from "@/lib/profile-display";
+import { unwrap } from "@/lib/utils";
 import { IqDisclaimer } from "@/components/iq-disclaimer";
 import {
   Radar,
@@ -195,11 +196,13 @@ function StudentDetail() {
   } = useQuery({
     queryKey: ["student-detail-profile", id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*, schools(name, region, district)")
-        .eq("id", id)
-        .maybeSingle();
+      const data = unwrap(
+        await supabase
+          .from("profiles")
+          .select("*, schools(name, region, district)")
+          .eq("id", id)
+          .maybeSingle(),
+      );
       return data;
     },
   });
@@ -207,11 +210,13 @@ function StudentDetail() {
   const { data: sp } = useQuery({
     queryKey: ["student-detail-sp", id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("student_profiles")
-        .select("radar_scores, iq_scores, top_careers, profile_completeness, ai_summary")
-        .eq("student_id", id)
-        .maybeSingle();
+      const data = unwrap(
+        await supabase
+          .from("student_profiles")
+          .select("radar_scores, iq_scores, top_careers, profile_completeness, ai_summary")
+          .eq("student_id", id)
+          .maybeSingle(),
+      );
       return data;
     },
   });
@@ -219,13 +224,15 @@ function StudentDetail() {
   const { data: results } = useQuery({
     queryKey: ["student-detail-results", id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("test_results")
-        .select(
-          "id, test_id, holland_code, personality_type, raw_scores, scaled_scores, created_at, tests(name_uz, category, test_type)",
-        )
-        .eq("student_id", id)
-        .order("created_at", { ascending: false });
+      const data = unwrap(
+        await supabase
+          .from("test_results")
+          .select(
+            "id, test_id, holland_code, personality_type, raw_scores, scaled_scores, created_at, tests(name_uz, category, test_type)",
+          )
+          .eq("student_id", id)
+          .order("created_at", { ascending: false }),
+      );
       return (data ?? []) as DetailResult[];
     },
   });
@@ -233,7 +240,7 @@ function StudentDetail() {
   const { data: allTests } = useQuery({
     queryKey: ["all-tests"],
     queryFn: async () => {
-      const { data } = await supabase.from("tests").select("id, name_uz").eq("is_active", true);
+      const data = unwrap(await supabase.from("tests").select("id, name_uz").eq("is_active", true));
       return (data ?? []) as DetailTest[];
     },
   });

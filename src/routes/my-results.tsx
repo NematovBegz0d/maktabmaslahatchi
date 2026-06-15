@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { CheckCircle2, FileText } from "lucide-react";
 
@@ -25,13 +26,15 @@ function MyResults() {
     queryKey: ["my-test-results", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("test_results")
-        .select(
-          "id, holland_code, personality_type, scaled_scores, raw_scores, created_at, tests(name_uz)",
-        )
-        .eq("student_id", user!.id)
-        .order("created_at", { ascending: false });
+      const data = unwrap(
+        await supabase
+          .from("test_results")
+          .select(
+            "id, holland_code, personality_type, scaled_scores, raw_scores, created_at, tests(name_uz)",
+          )
+          .eq("student_id", user!.id)
+          .order("created_at", { ascending: false }),
+      );
       return (data ?? []) as {
         id: string;
         holland_code: string | null;

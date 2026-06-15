@@ -5,6 +5,7 @@ import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { AISummary } from "@/components/ai-summary";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { IqDisclaimer } from "@/components/iq-disclaimer";
 import {
@@ -100,11 +101,13 @@ function MyReport() {
     queryKey: ["report-profile", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("full_name, class_number, class_letter, birth_date, schools(name, region)")
-        .eq("id", user!.id)
-        .maybeSingle();
+      const data = unwrap(
+        await supabase
+          .from("profiles")
+          .select("full_name, class_number, class_letter, birth_date, schools(name, region)")
+          .eq("id", user!.id)
+          .maybeSingle(),
+      );
       return data;
     },
   });
@@ -113,11 +116,13 @@ function MyReport() {
     queryKey: ["report-sp", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("student_profiles")
-        .select("radar_scores, iq_scores, top_careers, ai_summary, profile_completeness")
-        .eq("student_id", user!.id)
-        .maybeSingle();
+      const data = unwrap(
+        await supabase
+          .from("student_profiles")
+          .select("radar_scores, iq_scores, top_careers, ai_summary, profile_completeness")
+          .eq("student_id", user!.id)
+          .maybeSingle(),
+      );
       return data;
     },
   });
@@ -126,13 +131,15 @@ function MyReport() {
     queryKey: ["report-results", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("test_results")
-        .select(
-          "id, holland_code, personality_type, raw_scores, scaled_scores, created_at, tests(name_uz, test_type)",
-        )
-        .eq("student_id", user!.id)
-        .order("created_at", { ascending: false });
+      const data = unwrap(
+        await supabase
+          .from("test_results")
+          .select(
+            "id, holland_code, personality_type, raw_scores, scaled_scores, created_at, tests(name_uz, test_type)",
+          )
+          .eq("student_id", user!.id)
+          .order("created_at", { ascending: false }),
+      );
       return (data ?? []) as ReportResult[];
     },
   });

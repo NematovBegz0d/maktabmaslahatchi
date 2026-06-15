@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -56,7 +57,7 @@ function TestRunner() {
   const { data: test } = useQuery({
     queryKey: ["test", id],
     queryFn: async () => {
-      const { data } = await supabase.from("tests").select("*").eq("id", id).maybeSingle();
+      const data = unwrap(await supabase.from("tests").select("*").eq("id", id).maybeSingle());
       return data;
     },
   });
@@ -64,11 +65,9 @@ function TestRunner() {
   const { data: questions } = useQuery({
     queryKey: ["questions", id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("questions")
-        .select("*")
-        .eq("test_id", id)
-        .order("question_number");
+      const data = unwrap(
+        await supabase.from("questions").select("*").eq("test_id", id).order("question_number"),
+      );
       return data ?? [];
     },
   });

@@ -8,6 +8,7 @@ import { TestCard } from "@/components/test-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { unwrap } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/my-tests")({
@@ -41,10 +42,9 @@ function MyTests() {
     queryKey: ["my-sessions", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("test_sessions")
-        .select("test_id, status")
-        .eq("student_id", user!.id);
+      const data = unwrap(
+        await supabase.from("test_sessions").select("test_id, status").eq("student_id", user!.id),
+      );
       return data ?? [];
     },
   });

@@ -14,6 +14,7 @@ import { PortfolioSkeleton } from "@/components/portfolio-skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { iqLabel, RADAR_COLORS } from "@/lib/profile-display";
+import { unwrap } from "@/lib/utils";
 import { IqDisclaimer } from "@/components/iq-disclaimer";
 import {
   Radar,
@@ -174,11 +175,13 @@ function MyProfile() {
     queryKey: ["profile-full", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*, schools(name, region)")
-        .eq("id", user!.id)
-        .maybeSingle();
+      const data = unwrap(
+        await supabase
+          .from("profiles")
+          .select("*, schools(name, region)")
+          .eq("id", user!.id)
+          .maybeSingle(),
+      );
       return data;
     },
   });
@@ -187,11 +190,13 @@ function MyProfile() {
     queryKey: ["student-profile", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("student_profiles")
-        .select("radar_scores, iq_scores, top_careers, profile_completeness, ai_summary")
-        .eq("student_id", user!.id)
-        .maybeSingle();
+      const data = unwrap(
+        await supabase
+          .from("student_profiles")
+          .select("radar_scores, iq_scores, top_careers, profile_completeness, ai_summary")
+          .eq("student_id", user!.id)
+          .maybeSingle(),
+      );
       return data;
     },
   });
@@ -200,13 +205,15 @@ function MyProfile() {
     queryKey: ["my-results-full", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("test_results")
-        .select(
-          "id, test_id, holland_code, personality_type, raw_scores, scaled_scores, created_at, tests(name_uz, category, test_type)",
-        )
-        .eq("student_id", user!.id)
-        .order("created_at", { ascending: false });
+      const data = unwrap(
+        await supabase
+          .from("test_results")
+          .select(
+            "id, test_id, holland_code, personality_type, raw_scores, scaled_scores, created_at, tests(name_uz, category, test_type)",
+          )
+          .eq("student_id", user!.id)
+          .order("created_at", { ascending: false }),
+      );
       return (data ?? []) as ResultRow[];
     },
   });
@@ -217,11 +224,13 @@ function MyProfile() {
     queryKey: ["my-clubs-profile", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("club_members")
-        .select("id, joined_at, clubs(*)")
-        .eq("student_id", user!.id)
-        .order("joined_at", { ascending: false });
+      const data = unwrap(
+        await supabase
+          .from("club_members")
+          .select("id, joined_at, clubs(*)")
+          .eq("student_id", user!.id)
+          .order("joined_at", { ascending: false }),
+      );
       return (data ?? []) as ClubMembership[];
     },
   });
@@ -229,10 +238,9 @@ function MyProfile() {
   const { data: allTests } = useQuery({
     queryKey: ["all-tests"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("tests")
-        .select("id, name_uz, category")
-        .eq("is_active", true);
+      const data = unwrap(
+        await supabase.from("tests").select("id, name_uz, category").eq("is_active", true),
+      );
       return (data ?? []) as AllTest[];
     },
   });
