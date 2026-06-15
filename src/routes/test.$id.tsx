@@ -8,26 +8,18 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { unwrap } from "@/lib/utils";
+import DOMPurify from "isomorphic-dompurify";
 import { ChevronLeft, ChevronRight, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
-// SVG content from DB — allowlist-style sanitizer: remove dangerous tags/attrs
+// Bazadan kelgan SVG kontentini DOMPurify bilan tozalash (SVG profili).
+// Regex o'rniga sinovdan o'tgan kutubxona: script/foreignObject/style,
+// on* event handlerlar, javascript: sxemasi va <use> tashqi havolalari
+// avtomatik o'chiriladi; xavfsiz SVG (shu jumladan ichki #anchor) qoladi.
 function sanitizeSvg(raw: string): string {
-  return (
-    raw
-      // 1. script taglarini o'chirish
-      .replace(/<script[\s\S]*?<\/script>/gi, "")
-      // 2. foreignObject — ixtiyoriy HTML ni o'chirish
-      .replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, "")
-      // 3. Barcha on* event handlerlarini o'chirish (qiymat bilan birga)
-      .replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi, "")
-      // 4. <use> tashqi havola: faqat #anchor ruxsat, boshqalarni o'chirish
-      .replace(/(<use[^>]*?\s)(?:xlink:href|href)\s*=\s*["'](?!#)[^"']*["']/gi, "$1")
-      // 5. <style> ichidagi @import ni o'chirish
-      .replace(/(<style[\s\S]*?)@import[^;]*;?([\s\S]*?<\/style>)/gi, "$1$2")
-      // 6. javascript: sxemasini o'chirish (href, src, action)
-      .replace(/\s+(?:href|src|action)\s*=\s*["']\s*javascript:[^"']*["']/gi, "")
-  );
+  return DOMPurify.sanitize(raw, {
+    USE_PROFILES: { svg: true, svgFilters: true },
+  });
 }
 
 export const Route = createFileRoute("/test/$id")({

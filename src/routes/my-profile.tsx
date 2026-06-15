@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -14,7 +14,13 @@ import { PortfolioSkeleton } from "@/components/portfolio-skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { iqLabel, RADAR_COLORS } from "@/lib/profile-display";
-import { unwrap } from "@/lib/utils";
+import {
+  useMyProfileData,
+  type RadarItem,
+  type IqItem,
+  type TopCareer,
+  type SchoolRef,
+} from "@/hooks/use-my-profile";
 import { IqDisclaimer } from "@/components/iq-disclaimer";
 import {
   Radar,
@@ -121,132 +127,16 @@ const TEMP_INFO: Record<string, { emoji: string; desc: string; strong: string; d
     },
   };
 
-// iqLabel va RADAR_COLORS endi @/lib/profile-display'dan import qilinadi (takror emas)
-
-interface RadarItem {
-  skill: string;
-  value: number;
-}
-interface IqItem {
-  type: string;
-  score: number;
-}
-interface TopCareer {
-  id: string;
-  name_uz: string;
-  description: string | null;
-  required_skills: string[];
-  salary_range: string | null;
-  universities?: { name: string; city?: string }[];
-}
-interface ResultRow {
-  id: string;
-  test_id: string;
-  holland_code: string | null;
-  personality_type: string | null;
-  raw_scores: Record<string, number> | null;
-  scaled_scores: Record<string, number> | null;
-  created_at: string;
-  tests: { name_uz: string | null; category?: string | null; test_type?: string | null } | null;
-}
-interface ClubMembership {
-  id: string;
-  joined_at: string;
-  clubs: { id: string; name: string; icon: string; color: string } | null;
-}
-interface AllTest {
-  id: string;
-  name_uz: string | null;
-  category?: string | null;
-}
-type SchoolRef = { name?: string; region?: string } | null;
+// iqLabel/RADAR_COLORS → @/lib/profile-display; tiplar va data-qatlam → @/hooks/use-my-profile
 
 function MyProfile() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [aiBusy, setAiBusy] = useState(false);
 
-  const {
-    data: profile,
-    isLoading: profileLoading,
-    isError: profileError,
-    refetch: profileRefetch,
-  } = useQuery({
-    queryKey: ["profile-full", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const data = unwrap(
-        await supabase
-          .from("profiles")
-          .select("*, schools(name, region)")
-          .eq("id", user!.id)
-          .maybeSingle(),
-      );
-      return data;
-    },
-  });
-
-  const { data: sp, isLoading: spLoading } = useQuery({
-    queryKey: ["student-profile", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const data = unwrap(
-        await supabase
-          .from("student_profiles")
-          .select("radar_scores, iq_scores, top_careers, profile_completeness, ai_summary")
-          .eq("student_id", user!.id)
-          .maybeSingle(),
-      );
-      return data;
-    },
-  });
-
-  const { data: results, isLoading: resultsLoading } = useQuery({
-    queryKey: ["my-results-full", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const data = unwrap(
-        await supabase
-          .from("test_results")
-          .select(
-            "id, test_id, holland_code, personality_type, raw_scores, scaled_scores, created_at, tests(name_uz, category, test_type)",
-          )
-          .eq("student_id", user!.id)
-          .order("created_at", { ascending: false }),
-      );
-      return (data ?? []) as ResultRow[];
-    },
-  });
-
-  // Mening klublarim
-  const { data: myClubs } = useQuery({
-    // Distinct key: my-clubs sahifasi ["my-clubs-detail", uid] dan foydalanadi
-    queryKey: ["my-clubs-profile", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const data = unwrap(
-        await supabase
-          .from("club_members")
-          .select("id, joined_at, clubs(*)")
-          .eq("student_id", user!.id)
-          .order("joined_at", { ascending: false }),
-      );
-      return (data ?? []) as ClubMembership[];
-    },
-  });
-
-  const { data: allTests } = useQuery({
-    queryKey: ["all-tests"],
-    queryFn: async () => {
-      const data = unwrap(
-        await supabase.from("tests").select("id, name_uz, category").eq("is_active", true),
-      );
-      return (data ?? []) as AllTest[];
-    },
-  });
-
-  const loading = profileLoading || spLoading || resultsLoading;
-  const isError = profileError;
+  const { profile, sp, results, myClubs, allTests, loading, isError, refetch } = useMyProfileData(
+    user?.id,
+  );
 
   const radarData = (sp?.radar_scores as RadarItem[] | null) ?? [];
   const iqData = (sp?.iq_scores as IqItem[] | null) ?? [];
@@ -312,7 +202,7 @@ function MyProfile() {
       <div className="min-h-screen bg-background">
         <AppHeader />
         <main className="mx-auto max-w-4xl px-4 py-8">
-          <QueryError onRetry={() => profileRefetch()} />
+          <QueryError onRetry={() => refetch()} />
         </main>
       </div>
     );

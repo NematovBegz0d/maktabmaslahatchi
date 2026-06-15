@@ -345,7 +345,8 @@ function AdminDashboard() {
   });
 
   const { data: tests } = useQuery({
-    queryKey: ["tests-active"],
+    // Distinct key: o'quvchi paneli ["tests-active"] (select *) dan boshqa shakl
+    queryKey: ["admin-tests-active"],
     queryFn: async () => {
       const data = unwrap(await supabase.from("tests").select("id, name_uz").eq("is_active", true));
       return data ?? [];
