@@ -287,7 +287,7 @@ function MyReport() {
               {iqData.length > 0 && (
                 <div>
                   <h3 className="mb-1 text-sm font-semibold text-slate-700">
-                    Intellekt (taxminiy)
+                    Mantiqiy qobiliyat (taxminiy)
                   </h3>
                   <p className="mb-2 text-[10px] text-amber-600">
                     Rasmiy IQ testi emas — taxminiy nisbiy ball.

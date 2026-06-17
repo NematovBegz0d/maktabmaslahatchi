@@ -43,8 +43,8 @@ const TEST_TYPES: { value: string; label: string }[] = [
   { value: "big5", label: "Big Five (O/C/E/A/N subscale)" },
   { value: "eq", label: "Hissiy intellekt (EQ)" },
   { value: "leadership", label: "Liderlik" },
-  { value: "math_iq", label: "Matematik IQ (to'g'ri javob kaliti kerak)" },
-  { value: "raven", label: "Raven IQ (to'g'ri javob kaliti kerak)" },
+  { value: "math_iq", label: "Matematik mantiq (to'g'ri javob kaliti kerak)" },
+  { value: "raven", label: "Vizual mantiq / Raven (to'g'ri javob kaliti kerak)" },
 ];
 
 // To'g'ri javob kaliti kerak bo'lgan turlar (bilim testlari)

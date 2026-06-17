@@ -449,13 +449,9 @@ function MyProfile() {
         {iqData.length > 0 && (
           <Card className="mb-6 border-border/60" style={{ boxShadow: "var(--shadow-card)" }}>
             <CardContent className="p-6">
-              <h3 className="mb-1 font-semibold text-foreground flex items-center gap-2">
-                <Zap className="h-4 w-4 text-warning" /> Intellekt ko'rsatkichlari (taxminiy)
+              <h3 className="mb-3 font-semibold text-foreground flex items-center gap-2">
+                <Zap className="h-4 w-4 text-warning" /> Mantiqiy qobiliyat (taxminiy)
               </h3>
-              <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
-                ⚠️ Bu <strong>rasmiy IQ testi emas</strong>. Natija faqat ichki taqqoslash uchun
-                taxminiy nisbiy ball — yosh normalari va klinik validatsiyaga asoslanmagan.
-              </p>
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="h-56">
                   <ResponsiveContainer width="100%" height="100%">
@@ -464,7 +460,7 @@ function MyProfile() {
                       <YAxis domain={[60, 140]} tick={{ fontSize: 11 }} />
                       <Tooltip
                         contentStyle={{ borderRadius: 12, fontSize: 12 }}
-                        formatter={(v: number) => [v, "IQ"]}
+                        formatter={(v: number) => [v, "ball"]}
                       />
                       <Bar dataKey="score" radius={[8, 8, 0, 0]} fill="oklch(0.534 0.246 296.8)" />
                     </BarChart>
