@@ -1,0 +1,13 @@
+# Repo'da matn fayllar LF sifatida saqlanadi (Windows CRLF working-tree bilan ham
+# prettier/eslint toza ishlaydi — .prettierrc endOfLine: auto bilan).
+* text=auto
+
+# Ikkilik fayllar (eol konversiyasi qilinmasin)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary

@@ -41,3 +41,6 @@ dist-ssr
 
 # Claude Code o'rnatuvchi skripti (loyihaga aloqasi yo'q — adashib tushib qolmasin)
 install.cmd
+
+# Supabase CLI vaqtinchalik fayllari (versiya metadatasi)
+supabase/.temp/

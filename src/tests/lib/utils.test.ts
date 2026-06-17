@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cn } from "@/lib/utils";
+import { cn, unwrap } from "@/lib/utils";
 
 describe("cn (classnames utility)", () => {
   it("merges simple class strings", () => {
@@ -21,5 +21,30 @@ describe("cn (classnames utility)", () => {
 
   it("handles an empty call", () => {
     expect(cn()).toBe("");
+  });
+});
+
+describe("unwrap (Supabase javob ochuvchi)", () => {
+  it("xato bo'lmasa data'ni qaytaradi", () => {
+    expect(unwrap({ data: [1, 2, 3], error: null })).toEqual([1, 2, 3]);
+  });
+
+  it("data null bo'lsa ham qaytaradi (xato yo'q)", () => {
+    expect(unwrap({ data: null, error: null })).toBeNull();
+  });
+
+  it("xato bo'lsa throw qiladi (jim yutmaydi)", () => {
+    expect(() => unwrap({ data: null, error: { message: "RLS rad etdi" } })).toThrow(
+      "RLS rad etdi",
+    );
+  });
+
+  it("throw qilingan xato Error tipida", () => {
+    try {
+      unwrap({ data: null, error: { message: "tarmoq xatosi" } });
+      expect.unreachable("throw bo'lishi kerak edi");
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error);
+    }
   });
 });
