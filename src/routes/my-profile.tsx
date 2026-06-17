@@ -477,9 +477,12 @@ function MyProfile() {
                       <div key={item.type} className="rounded-lg border border-border/50 p-3">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium text-foreground">{item.type}</span>
-                          <span className="text-xl font-bold text-foreground">{item.score}</span>
+                          {/* Sifat darajasi asosiy; soxta aniq raqam o'rniga taxminiy ko'rsatkich */}
+                          <span className={`text-base font-bold ${label.color}`}>{label.text}</span>
                         </div>
-                        <span className={`text-xs font-semibold ${label.color}`}>{label.text}</span>
+                        <span className="text-xs text-muted-foreground">
+                          ~{item.score} (taxminiy)
+                        </span>
                       </div>
                     );
                   })}

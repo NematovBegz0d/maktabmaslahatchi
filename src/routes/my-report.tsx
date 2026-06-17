@@ -310,7 +310,9 @@ function MyReport() {
                     {iqData.map((item) => (
                       <p key={item.type} className="text-xs text-slate-500">
                         <span className="font-semibold text-slate-700">{item.type}:</span>{" "}
-                        {item.score} — {iqLabel(item.score)}
+                        <span className="font-semibold text-slate-700">{iqLabel(item.score)}</span>{" "}
+                        (~
+                        {item.score} taxminiy)
                       </p>
                     ))}
                   </div>
