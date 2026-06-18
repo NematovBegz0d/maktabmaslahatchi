@@ -51,6 +51,25 @@ function ClubsPage() {
   const [cFocus, setCFocus] = useState("");
   const [cDesc, setCDesc] = useState("");
   const [creating, setCreating] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+
+  // Namuna rejimida — 7 ta tayyor klubni bir bosishda maktabga yaratish.
+  // RLS "Counselors insert own school clubs" school_id = get_my_school_id() ni talab qiladi.
+  async function seedSampleClubs() {
+    if (!schoolId) return;
+    setSeeding(true);
+    const { error } = await supabase
+      .from("clubs")
+      .insert(CLUBS_STATIC.map((c) => ({ ...c, school_id: schoolId })));
+    setSeeding(false);
+    if (error) {
+      toast.error("Klublar yaratilmadi: " + error.message);
+      return;
+    }
+    toast.success("7 ta namuna klub maktabingizga qo'shildi");
+    qc.invalidateQueries({ queryKey: ["clubs"] });
+    qc.invalidateQueries({ queryKey: ["club-member-counts"] });
+  }
 
   async function createClub() {
     if (!cName.trim()) {
@@ -240,9 +259,27 @@ function ClubsPage() {
               <>
                 {/* DB bo'sh bo'lsa ogohlantirish (gridtdan oldin) */}
                 {isFallback && isStaff && (
-                  <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-                    ⚠️ Maktabingizda hali klub yo'q — quyidagilar namuna. "Klub qo'shish" tugmasi
-                    orqali o'z maktabingiz klublarini yarating.
+                  <div className="mb-5 flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300 sm:flex-row sm:items-center sm:justify-between">
+                    <p>
+                      ⚠️ Maktabingizda hali klub yo'q — quyidagilar <strong>namuna</strong> (bosib
+                      bo'lmaydi). O'z klublaringizni yarating yoki shu 7 tasini bir bosishda
+                      qo'shing.
+                    </p>
+                    {canCreate && (
+                      <Button
+                        size="sm"
+                        onClick={seedSampleClubs}
+                        disabled={seeding}
+                        className="shrink-0"
+                      >
+                        {seeding ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Plus className="mr-1.5 h-4 w-4" />
+                        )}
+                        Shu 7 klubni yaratish
+                      </Button>
+                    )}
                   </div>
                 )}
 

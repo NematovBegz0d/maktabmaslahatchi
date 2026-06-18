@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Logo } from "./logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { NotificationBell } from "@/components/notification-bell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/lib/theme";
@@ -181,8 +182,9 @@ export function AppHeader() {
           ))}
         </nav>
 
-        {/* O'ng taraf: til, mavzu, chiqish */}
+        {/* O'ng taraf: bildirishnoma (maslahatchi), til, mavzu, chiqish */}
         <div className="flex items-center gap-1">
+          {roleKnown && isCounselor && <NotificationBell />}
           <Button
             variant="ghost"
             size="sm"

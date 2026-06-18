@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ProtectedRoute } from "@/components/protected-route";
 import { AppHeader } from "@/components/app-header";
 import { StatCard } from "@/components/stat-card";
+import { CounselorTodoCard } from "@/components/counselor-todo-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -417,6 +418,11 @@ function AdminDashboard() {
             accent="warning"
           />
           <StatCard label="Testlar soni" value={tests?.length ?? 0} icon={Brain} accent="primary" />
+        </div>
+
+        {/* Bajariladigan ishlar (derived bildirishnomalar) */}
+        <div className="mb-5">
+          <CounselorTodoCard />
         </div>
 
         {/* Asosiy grid */}
