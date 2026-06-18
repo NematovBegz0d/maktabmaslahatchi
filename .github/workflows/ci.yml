@@ -17,8 +17,12 @@ jobs:
           node-version: "22"
           cache: npm
 
+      # `npm ci` o'rniga `npm install`: lockfile Windows'da yaratilgani uchun
+      # faqat win32 rollup binarisini sanaydi. `npm ci` qat'iy bo'lib, Linux
+      # runnerda `@rollup/rollup-linux-x64-gnu` ni o'rnatmaydi (npm bug #4828).
+      # `npm install` joriy platforma uchun kerakli optional-dep'ni o'rnatadi.
       - name: O'rnatish
-        run: npm ci
+        run: npm install
 
       - name: Tiplar (tsc)
         run: npx tsc --noEmit
