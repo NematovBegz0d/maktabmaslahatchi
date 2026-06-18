@@ -17,15 +17,18 @@ jobs:
           node-version: "22"
           cache: npm
 
-      # Lockfile Windows'da yaratilgani uchun faqat win32 rollup binarisini
-      # sanaydi. Lockfile mavjud bo'lsa npm uni "to'liq" deb hisoblab, Linux
-      # uchun @rollup/rollup-linux-x64-gnu ni o'rnatmaydi (npm bug #4828 —
-      # `npm ci` ham, `npm install` ham). Yagona ishonchli yo'l: lockfile'ni
-      # o'chirib, Linux uchun toza resolve qilish (node_modules CI'da baribir toza).
+      # Lockfile Windows'da yaratilgani uchun Linux rollup binarisini sanamaydi
+      # (npm bug #4828). Uni o'chirib toza resolve qilib bo'lmaydi — peer-dep
+      # konfliktiga uchraydi (vite-tanstack-config <-> nitro). Shuning uchun:
+      # npm ci bilan barqaror, qadalgan daraxt + yetishmagan Linux rollup
+      # binarisini (aynan o'sha versiyada) committed fayllarga tegmasdan qo'shamiz.
       - name: O'rnatish
+        run: npm ci
+
+      - name: Linux rollup binarisi (npm #4828 vaqtinchalik yechimi)
         run: |
-          rm -f package-lock.json
-          npm install
+          npm install --no-save --no-package-lock --legacy-peer-deps \
+            "@rollup/rollup-linux-x64-gnu@$(node -p "require('rollup/package.json').version")"
 
       - name: Tiplar (tsc)
         run: npx tsc --noEmit
