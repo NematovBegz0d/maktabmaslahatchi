@@ -57,6 +57,13 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "Bu sessiya sizga tegishli emas" }, 403);
     }
 
+    // 4b) Idempotentlik: sessiya allaqachon yakunlangan bo'lsa, qayta
+    // hisoblamaymiz. Bu ikki marta bosish / parallel so'rovlar (poyga holati)
+    // qayta ishlashning oldini oladi.
+    if (session.status === "completed") {
+      return jsonResponse({ ok: true, alreadyCompleted: true });
+    }
+
     // 5) Test turi
     const { data: test } = await admin
       .from("tests")
@@ -100,29 +107,27 @@ Deno.serve(async (req: Request) => {
     // 9) Ball hisoblash
     const result = scoreTest(testType, qs, answers, keys);
 
-    // 10) Eski natijani o'chirib, yangisini yozish (qayta hisoblashda dublikat bo'lmasligi uchun)
-    await admin
-      .from("test_results")
-      .delete()
-      .eq("student_id", userId)
-      .eq("test_id", session.test_id);
+    // 10) Natijani ATOMIK yozish — DELETE+INSERT o'rniga UPSERT
+    // (ux_test_results_student_test unique indeksiga tayanadi). Bu ma'lumot
+    // yo'qolish oynasini (insert xato bersa eski natija ketardi) va dublikat
+    // qatorlarni butunlay yo'qotadi.
+    const { error: resultErr } = await admin.from("test_results").upsert(
+      {
+        student_id: userId,
+        test_id: session.test_id,
+        raw_scores: result.rawScores,
+        scaled_scores: result.scaledScores,
+        personality_type: result.personalityType,
+        holland_code: result.hollandCode,
+      },
+      { onConflict: "student_id,test_id" },
+    );
+    if (resultErr) {
+      console.error("[complete-session] test_results upsert:", resultErr.message);
+      return jsonResponse({ error: "Natijani saqlashda xatolik" }, 500);
+    }
 
-    await admin.from("test_results").insert({
-      student_id: userId,
-      test_id: session.test_id,
-      raw_scores: result.rawScores,
-      scaled_scores: result.scaledScores,
-      personality_type: result.personalityType,
-      holland_code: result.hollandCode,
-    });
-
-    // 11) Sessiyani yakunlash
-    await admin
-      .from("test_sessions")
-      .update({ status: "completed", completed_at: new Date().toISOString() })
-      .eq("id", sessionId);
-
-    // 12) Yig'ma profilni qayta qurish (barcha natijalar asosida)
+    // 11) Yig'ma profilni qayta qurish (barcha natijalar asosida)
     const { data: allResults } = await admin
       .from("test_results")
       .select(
@@ -146,7 +151,7 @@ Deno.serve(async (req: Request) => {
 
     const agg = aggregateProfile(normalized, totalTests ?? 8);
 
-    // 13) Kasb mosligi (Holland kodi asosida)
+    // 12) Kasb mosligi (Holland kodi asosida)
     const { data: careers } = await admin
       .from("careers")
       .select(
@@ -154,8 +159,8 @@ Deno.serve(async (req: Request) => {
       );
     const topCareers = matchCareers(agg.holland_code, (careers ?? []) as CareerRow[]);
 
-    // 14) student_profiles upsert
-    await admin.from("student_profiles").upsert(
+    // 13) student_profiles upsert (radar, IQ, top kasblar keshi)
+    const { error: profileErr } = await admin.from("student_profiles").upsert(
       {
         student_id: userId,
         radar_scores: agg.radar_scores,
@@ -166,6 +171,22 @@ Deno.serve(async (req: Request) => {
       },
       { onConflict: "student_id" },
     );
+    if (profileErr) {
+      console.error("[complete-session] student_profiles upsert:", profileErr.message);
+      return jsonResponse({ error: "Profilni yangilashda xatolik" }, 500);
+    }
+
+    // 14) Sessiyani ENG OXIRIDA yakunlaymiz — faqat yuqoridagi yozuvlar
+    // muvaffaqiyatli bo'lsagina. Aks holda sessiya "completed" bo'lmay qoladi,
+    // qayta urinish esa to'liq qayta hisoblaydi (idempotentlik buzilmaydi).
+    const { error: sessionErr } = await admin
+      .from("test_sessions")
+      .update({ status: "completed", completed_at: new Date().toISOString() })
+      .eq("id", sessionId);
+    if (sessionErr) {
+      console.error("[complete-session] session update:", sessionErr.message);
+      return jsonResponse({ error: "Sessiyani yakunlashda xatolik" }, 500);
+    }
 
     return jsonResponse({
       ok: true,
