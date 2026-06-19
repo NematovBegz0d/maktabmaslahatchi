@@ -1,0 +1,18 @@
+name: DB Tests (pgTAP)
+
+# Migratsiyalarni toza Postgres'ga qo'llab, RLS/constraint invariantlarini
+# pgTAP bilan runtime'da tekshiradi (kod o'qish emas — haqiqiy ijro).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pgtap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # GitHub ubuntu runner'larida docker oldindan o'rnatilgan.
+      - name: pgTAP DB testlari
+        run: bash scripts/db-test.sh
