@@ -18,6 +18,9 @@ verify_jwt = true
 [functions.delete-student]
 verify_jwt = true
 
+[functions.reset-student-password]
+verify_jwt = true
+
 # Landing arizasi — login'siz (anon) chaqiriladi, shuning uchun JWT tekshirilmaydi.
 # Himoya funksiya ichida (IP/telefon throttle) bajariladi.
 [functions.submit-application]

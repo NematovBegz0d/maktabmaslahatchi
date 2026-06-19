@@ -12,6 +12,14 @@ import { QueryError } from "@/components/query-error";
 import { PortfolioSkeleton } from "@/components/portfolio-skeleton";
 import { SocialPortfolio } from "@/components/social-portfolio";
 import { EditStudentDialog } from "@/components/edit-student-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { SubjectResults, type SubjectResult } from "@/components/subject-results";
 import { supabase } from "@/integrations/supabase/client";
 import { iqLabel, RADAR_COLORS } from "@/lib/profile-display";
@@ -49,6 +57,7 @@ import {
   Pencil,
   Archive,
   Trash2,
+  KeyRound,
 } from "lucide-react";
 
 export const Route = createFileRoute("/students/$id")({
@@ -139,6 +148,8 @@ function StudentDetail() {
   const [editOpen, setEditOpen] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [resettingPw, setResettingPw] = useState(false);
+  const [pwResult, setPwResult] = useState<{ login: string | null; password: string } | null>(null);
 
   async function deleteStudent(name: string) {
     if (
@@ -165,6 +176,33 @@ function StudentDetail() {
     qc.invalidateQueries({ queryKey: ["students-list"] });
     qc.invalidateQueries({ queryKey: ["admin-students"] });
     navigate({ to: "/students" });
+  }
+
+  async function resetPassword(name: string) {
+    if (
+      !confirm(
+        `"${name}" uchun YANGI parol yaratiladi. Eski parol bekor bo'ladi.\n\n` +
+          `Yangi parol bir marta ko'rsatiladi — uni o'quvchiga bering. Davom etasizmi?`,
+      )
+    )
+      return;
+    setResettingPw(true);
+    const { data, error } = await supabase.functions.invoke("reset-student-password", {
+      body: { student_id: id },
+    });
+    setResettingPw(false);
+    if (error) {
+      console.error("[reset-student-password]", error);
+      toast.error("Parolni tiklashda xatolik yuz berdi. Qayta urinib ko'ring.");
+      return;
+    }
+    const student = (data as { student?: { login: string | null; password: string } } | null)
+      ?.student;
+    if (!student?.password) {
+      toast.error("Parol qaytmadi. Qayta urinib ko'ring.");
+      return;
+    }
+    setPwResult({ login: student.login, password: student.password });
   }
 
   async function archiveStudent() {
@@ -338,6 +376,15 @@ function StudentDetail() {
             <Button
               variant="outline"
               size="sm"
+              disabled={resettingPw}
+              onClick={() => resetPassword(profile.full_name ?? "o'quvchi")}
+            >
+              <KeyRound className="mr-1.5 h-4 w-4" />{" "}
+              {resettingPw ? "Tiklanmoqda..." : "Parol tiklash"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               disabled={archiving}
               onClick={archiveStudent}
               className="text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/30"
@@ -356,6 +403,44 @@ function StudentDetail() {
             </Button>
           </div>
         </div>
+
+        <Dialog open={pwResult !== null} onOpenChange={(o) => !o && setPwResult(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Yangi parol yaratildi</DialogTitle>
+              <DialogDescription>
+                Bu parol faqat HOZIR ko'rsatiladi. Nusxalab, o'quvchiga bering — keyin ko'rib
+                bo'lmaydi.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 rounded-lg border bg-muted/40 p-4 text-sm">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-muted-foreground">Login</span>
+                <span className="font-mono font-semibold">{pwResult?.login ?? "—"}</span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-muted-foreground">Yangi parol</span>
+                <span className="font-mono font-semibold">{pwResult?.password}</span>
+              </div>
+            </div>
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (pwResult) {
+                    navigator.clipboard
+                      ?.writeText(`Login: ${pwResult.login ?? ""}\nParol: ${pwResult.password}`)
+                      .then(() => toast.success("Nusxalandi"))
+                      .catch(() => toast.error("Nusxalab bo'lmadi"));
+                  }
+                }}
+              >
+                Nusxalash
+              </Button>
+              <Button onClick={() => setPwResult(null)}>Yopish</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <EditStudentDialog
           open={editOpen}
