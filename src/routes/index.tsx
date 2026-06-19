@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Turnstile, turnstileEnabled } from "@/components/turnstile";
 import {
   Dialog,
   DialogContent,
@@ -769,10 +770,15 @@ function ApplyDialog({ club, onClose }: { club: CenterClub | null; onClose: () =
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   async function submit() {
     if (!fullName.trim() || phone.replace(/\D/g, "").length < 9) {
       toast.error("Ism va to'g'ri telefon raqam kiriting");
+      return;
+    }
+    if (turnstileEnabled && !captchaToken) {
+      toast.error("Iltimos, bot emasligingizni tasdiqlang");
       return;
     }
     setSending(true);
@@ -784,6 +790,7 @@ function ApplyDialog({ club, onClose }: { club: CenterClub | null; onClose: () =
         full_name: fullName.trim(),
         phone: phone.trim(),
         note: note.trim() || null,
+        captcha_token: captchaToken,
       },
     });
     setSending(false);
@@ -810,6 +817,7 @@ function ApplyDialog({ club, onClose }: { club: CenterClub | null; onClose: () =
       setPhone("");
       setNote("");
       setSent(false);
+      setCaptchaToken(null);
     }, 300);
   }
 
@@ -870,6 +878,7 @@ function ApplyDialog({ club, onClose }: { club: CenterClub | null; onClose: () =
                   placeholder="Yoshi, qulay vaqt..."
                 />
               </div>
+              {turnstileEnabled && <Turnstile onToken={setCaptchaToken} />}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={close} disabled={sending}>
