@@ -166,13 +166,7 @@ function CounselorTasks() {
       toast.error("Topshirilmadi: " + error.message);
       return;
     }
-    await logClientActivity(
-      user?.id,
-      "task_submitted",
-      submitting.tasks?.title ?? "",
-      undefined,
-      schoolId,
-    );
+    await logClientActivity(user?.id, "task_submitted", submitting.tasks?.title ?? "");
     toast.success("Vazifa topshirildi — admin ko'rib chiqadi");
     setSubmitting(null);
     setNote("");
