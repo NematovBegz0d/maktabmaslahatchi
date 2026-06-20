@@ -8,6 +8,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { unwrap } from "@/lib/utils";
 import {
+  avgCompleteness,
+  hollandDistribution,
+  temperamentDistribution,
+  testPopularity,
+  topRecommendedCareers,
+  computeSubjectStats,
+  type AnalyticsResult,
+  type AnalyticsProfile,
+  type AnalyticsSubject,
+} from "@/lib/analytics-agg";
+import {
   ResponsiveContainer,
   BarChart,
   Bar,
@@ -38,30 +49,7 @@ export const Route = createFileRoute("/analytics")({
   ),
 });
 
-const HOLLAND_NAMES: Record<string, string> = {
-  R: "Realistik",
-  I: "Tadqiqotchi",
-  A: "Ijodkor",
-  S: "Ijtimoiy",
-  E: "Tadbirkor",
-  C: "Konventsion",
-};
 const PIE_COLORS = ["#2563EB", "#7C3AED", "#10B981", "#F59E0B", "#EF4444", "#06B6D4"];
-
-interface ResultRow {
-  holland_code: string | null;
-  personality_type: string | null;
-  test_id: string;
-  tests: { name_uz: string } | null;
-}
-interface SpRow {
-  profile_completeness: number | null;
-  top_careers: { name_uz?: string; name?: string }[] | null;
-}
-interface SubjectRow {
-  scaled_scores: Record<string, number> | null;
-  tests: { name_uz: string | null; test_type: string | null } | null;
-}
 const GRADE_BAR = ["#ef4444", "#f59e0b", "#3b82f6", "#10b981"]; // 2,3,4,5 ranglari
 
 function Analytics() {
@@ -96,7 +84,7 @@ function Analytics() {
           .from("test_results")
           .select("holland_code, personality_type, test_id, tests(name_uz)"),
       );
-      return (data ?? []) as ResultRow[];
+      return (data ?? []) as AnalyticsResult[];
     },
   });
 
@@ -110,7 +98,7 @@ function Analytics() {
       const data = unwrap(
         await supabase.from("student_profiles").select("profile_completeness, top_careers"),
       );
-      return (data ?? []) as SpRow[];
+      return (data ?? []) as AnalyticsProfile[];
     },
   });
 
@@ -120,7 +108,7 @@ function Analytics() {
       const data = unwrap(
         await supabase.from("test_results").select("scaled_scores, tests(name_uz, test_type)"),
       );
-      return ((data ?? []) as unknown as SubjectRow[]).filter(
+      return ((data ?? []) as unknown as AnalyticsSubject[]).filter(
         (r) => r.tests?.test_type === "subject",
       );
     },
@@ -129,80 +117,16 @@ function Analytics() {
   const loading = sLoading || rLoading || pLoading;
   const isError = sError || rError || pError;
 
-  // --- Metrikalar ---
+  // --- Metrikalar (agregatsiya: @/lib/analytics-agg) ---
   const totalStudents = students?.length ?? 0;
   const completedTests = results?.length ?? 0;
-  const avgCompleteness =
-    profiles && profiles.length
-      ? Math.round(
-          profiles.reduce((a, p) => a + (p.profile_completeness ?? 0), 0) / profiles.length,
-        )
-      : 0;
   const activeStudents = profiles?.length ?? 0;
-
-  // Holland taqsimoti (1-harf bo'yicha)
-  const hollandCounts: Record<string, number> = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
-  (results ?? []).forEach((r) => {
-    const first = (r.holland_code ?? "").charAt(0).toUpperCase();
-    if (first in hollandCounts) hollandCounts[first] += 1;
-  });
-  const hollandData = Object.entries(hollandCounts)
-    .map(([k, v]) => ({ name: HOLLAND_NAMES[k], short: k, value: v }))
-    .filter((x) => x.value > 0);
-
-  // Temperament taqsimoti
-  const tempCounts: Record<string, number> = {};
-  (results ?? []).forEach((r) => {
-    if (r.personality_type)
-      tempCounts[r.personality_type] = (tempCounts[r.personality_type] ?? 0) + 1;
-  });
-  const tempData = Object.entries(tempCounts).map(([name, value]) => ({ name, value }));
-
-  // Test mashhurligi
-  const testCounts: Record<string, number> = {};
-  (results ?? []).forEach((r) => {
-    const n = r.tests?.name_uz ?? "Test";
-    testCounts[n] = (testCounts[n] ?? 0) + 1;
-  });
-  const testData = Object.entries(testCounts)
-    .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value);
-
-  // Eng ko'p tavsiya etilgan kasblar
-  const careerCounts: Record<string, number> = {};
-  (profiles ?? []).forEach((p) => {
-    (p.top_careers ?? []).forEach((c) => {
-      const n = c.name_uz ?? c.name;
-      if (n) careerCounts[n] = (careerCounts[n] ?? 0) + 1;
-    });
-  });
-  const topCareers = Object.entries(careerCounts)
-    .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 6);
-
-  // --- Fan testlari statistikasi ---
-  const subjAgg: Record<
-    string,
-    { sumP: number; sumG: number; n: number; g: Record<number, number> }
-  > = {};
-  (subjectRows ?? []).forEach((r) => {
-    const name = r.tests?.name_uz ?? "Fan";
-    const ss = r.scaled_scores ?? {};
-    if (!subjAgg[name]) subjAgg[name] = { sumP: 0, sumG: 0, n: 0, g: { 2: 0, 3: 0, 4: 0, 5: 0 } };
-    subjAgg[name].sumP += ss.percent ?? 0;
-    subjAgg[name].sumG += ss.grade ?? 0;
-    subjAgg[name].n += 1;
-    const gr = ss.grade ?? 2;
-    if (gr >= 2 && gr <= 5) subjAgg[name].g[gr] = (subjAgg[name].g[gr] ?? 0) + 1;
-  });
-  const subjectStats = Object.entries(subjAgg).map(([name, v]) => ({
-    name,
-    avgPercent: Math.round(v.sumP / v.n),
-    avgGrade: Math.round((v.sumG / v.n) * 10) / 10,
-    count: v.n,
-    grades: v.g,
-  }));
+  const avgCmpl = avgCompleteness(profiles ?? []);
+  const hollandData = hollandDistribution(results ?? []);
+  const tempData = temperamentDistribution(results ?? []);
+  const testData = testPopularity(results ?? []);
+  const topCareers = topRecommendedCareers(profiles ?? []);
+  const subjectStats = computeSubjectStats(subjectRows ?? []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -243,7 +167,7 @@ function Analytics() {
               />
               <StatCard
                 label="Oʻrtacha toʻliqlik"
-                value={`${avgCompleteness}%`}
+                value={`${avgCmpl}%`}
                 icon={TrendingUp}
                 accent="primary"
               />
