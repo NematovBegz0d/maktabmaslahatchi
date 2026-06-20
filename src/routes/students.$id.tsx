@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -23,7 +23,7 @@ import {
 import { SubjectResults, type SubjectResult } from "@/components/subject-results";
 import { supabase } from "@/integrations/supabase/client";
 import { iqLabel, RADAR_COLORS, HOLLAND_INFO, TEMP_INFO } from "@/lib/profile-display";
-import { unwrap } from "@/lib/utils";
+import { useStudentDetail } from "@/hooks/use-student-detail";
 import { IqDisclaimer } from "@/components/iq-disclaimer";
 import {
   Radar,
@@ -88,20 +88,7 @@ interface DetailCareer {
   salary_range: string | null;
   universities?: { name: string; city?: string }[];
 }
-interface DetailResult {
-  id: string;
-  test_id: string;
-  holland_code: string | null;
-  personality_type: string | null;
-  raw_scores: Record<string, number> | null;
-  scaled_scores: Record<string, number> | null;
-  created_at: string;
-  tests: { name_uz: string | null; category?: string | null; test_type?: string | null } | null;
-}
-interface DetailTest {
-  id: string;
-  name_uz: string | null;
-}
+// DetailResult, DetailTest tiplari va data-qatlam → @/hooks/use-student-detail
 
 function StudentDetail() {
   const { id } = Route.useParams();
@@ -188,62 +175,7 @@ function StudentDetail() {
     navigate({ to: "/students" });
   }
 
-  const {
-    data: profile,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
-    queryKey: ["student-detail-profile", id],
-    queryFn: async () => {
-      const data = unwrap(
-        await supabase
-          .from("profiles")
-          .select("*, schools(name, region, district)")
-          .eq("id", id)
-          .maybeSingle(),
-      );
-      return data;
-    },
-  });
-
-  const { data: sp } = useQuery({
-    queryKey: ["student-detail-sp", id],
-    queryFn: async () => {
-      const data = unwrap(
-        await supabase
-          .from("student_profiles")
-          .select("radar_scores, iq_scores, top_careers, profile_completeness, ai_summary")
-          .eq("student_id", id)
-          .maybeSingle(),
-      );
-      return data;
-    },
-  });
-
-  const { data: results } = useQuery({
-    queryKey: ["student-detail-results", id],
-    queryFn: async () => {
-      const data = unwrap(
-        await supabase
-          .from("test_results")
-          .select(
-            "id, test_id, holland_code, personality_type, raw_scores, scaled_scores, created_at, tests(name_uz, category, test_type)",
-          )
-          .eq("student_id", id)
-          .order("created_at", { ascending: false }),
-      );
-      return (data ?? []) as DetailResult[];
-    },
-  });
-
-  const { data: allTests } = useQuery({
-    queryKey: ["all-tests"],
-    queryFn: async () => {
-      const data = unwrap(await supabase.from("tests").select("id, name_uz").eq("is_active", true));
-      return (data ?? []) as DetailTest[];
-    },
-  });
+  const { profile, sp, results, allTests, isLoading, isError, refetch } = useStudentDetail(id);
 
   const radarData = (sp?.radar_scores as RadarItem[] | null) ?? [];
   const iqData = (sp?.iq_scores as IqItem[] | null) ?? [];

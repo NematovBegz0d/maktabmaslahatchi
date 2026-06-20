@@ -53,10 +53,11 @@
 - ✅ **3.4** Reyting mantig'i testlari: `rating.ts` (`computeRating`, `rankEmoji`) + `school-stats.ts` (`schoolStatus`). Jami test: **103**.
 
 ## BOSQICH 4 — Kod sifati / arxitektura 🔄
-- 🔄 **4.1** Semiz rout fayllarni bo'lish (bittadan, test bilan):
-  - ✅ `HOLLAND_INFO`/`TEMP_INFO` dedup → `profile-display.ts` (my-profile 800→742, students.$id ham).
+- ✅ **4.1** Semiz routlardan xavfsiz extraction'lar (sof mantiq + data-qatlam, test bilan):
+  - ✅ `HOLLAND_INFO`/`TEMP_INFO` dedup → `profile-display.ts` (my-profile 800→742).
   - ✅ analytics agregatsiyasi → `lib/analytics-agg.ts` (analytics 455→379).
-  - ⬜ keyingi: `index` (901), `students.$id` data-hook'lari, dialog komponentlari.
+  - ✅ students.$id data-qatlami → `use-student-detail.ts` (877→813).
+  - ⏸️ *Optional follow-up:* `index.tsx` (901) chuqur JSX komponentizatsiyasi — rout testi yo'qligi sabab ehtiyot bilan, alohida.
 - ✅ **4.2** `auth_rls_initplan`: 24 ta eski policy (clubs/council/achievements/enrollments/club_members) `(select auth.uid())` / `(select has_role(...))` ga o'raldi (migratsiya prodda, tarix moslangan). Tasdiq: o'ralmagan = 0, policy soni o'zgarmagan. Xulq-atvor bir xil.
 - ✅ **4.3** `analytics.tsx` ko'rib chiqildi: N+1 yo'q (4 bulk query). Agregatsiya mantig'i `lib/analytics-agg.ts`ga ajratildi + 10 test. *(Follow-up: `test_results` 2 marta olinadi — bitta query'ga birlashtirsa bo'ladi.)*
 
