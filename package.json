@@ -12,7 +12,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "check:schema": "node scripts/check-schema-sync.mjs",
+    "gen:types": "supabase gen types typescript --project-id irkoxlxdpkisfvwtxsga > src/integrations/supabase/types.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
