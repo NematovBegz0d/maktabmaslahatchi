@@ -34,6 +34,23 @@ trap cleanup EXIT
 psql_su() { $RT exec -e PGPASSWORD="$DBPASS" -i "$NAME" psql -U "$DBUSER" -d postgres -v ON_ERROR_STOP=1 "$@"; }
 
 log "▶ Postgres konteyner: $IMAGE"
+
+# public.ecr.aws anonim pull rate-limit'i (toomanyrequests) — GitHub runner IP'lari
+# ulashilgani uchun tez-tez uchraydigan TRANSIENT xato. Image'ni qayta-urinish
+# (backoff) bilan OLDINDAN tortamiz; keyin `run` lokal image'ni ishlatadi.
+pull_ok=0
+for attempt in 1 2 3 4 5; do
+  if $RT pull "$IMAGE" >/dev/null 2>&1; then pull_ok=1; break; fi
+  wait=$((attempt * 15))
+  log "  ⚠ image pull urinish #$attempt muvaffaqiyatsiz (rate-limit?) — ${wait}s kutib qayta urinaman"
+  sleep "$wait"
+done
+[ "$pull_ok" = 1 ] || {
+  echo "XATO: '$IMAGE' image'ini tortib bo'lmadi (ECR rate-limit)."
+  echo "Job'ni qayta ishga tushiring yoki workflow'ga ECR Public auth qo'shing (limitni oshiradi)."
+  exit 1
+}
+
 $RT run -d --name "$NAME" \
   -e POSTGRES_PASSWORD=postgres \
   -e POSTGRES_HOST_AUTH_METHOD=trust \
