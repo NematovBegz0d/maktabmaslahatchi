@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -15,18 +15,12 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-// Guvohnoma seriyasi formatini tekshirish: harf+raqam, @ yo'q
-function isPassportSeries(val: string): boolean {
-  return !val.includes("@") && /^[a-zA-Zа-яА-ЯёЁ]{2,3}\d{7}$/i.test(val.trim());
-}
-
 // Guvohnoma → Supabase email formatiga o'tkazish
 function toStudentEmail(series: string): string {
   return `${series.toLowerCase().trim()}@edulab.uz`;
 }
 
 function AuthPage() {
-  const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { t } = useI18n();
 
@@ -88,7 +82,6 @@ function LoginForm() {
   const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(0);
-  const navigate = useNavigate();
   const { t } = useI18n();
 
   const isStudent = loginId.length > 0 && !loginId.includes("@");
