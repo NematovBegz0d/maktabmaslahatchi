@@ -13,7 +13,7 @@ import { QueryError } from "@/components/query-error";
 import { PortfolioSkeleton } from "@/components/portfolio-skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { iqLabel, RADAR_COLORS } from "@/lib/profile-display";
+import { iqLabel, RADAR_COLORS, HOLLAND_INFO, TEMP_INFO } from "@/lib/profile-display";
 import {
   useMyProfileData,
   type RadarItem,
@@ -68,66 +68,8 @@ export const Route = createFileRoute("/my-profile")({
   ),
 });
 
-// ─── Holland kodi ta'riflari ───────────────────────────────────────────────
-const HOLLAND_INFO: Record<string, { label: string; desc: string; color: string }> = {
-  R: {
-    label: "Realistik",
-    desc: "Amaliy, texnik, jismoniy ish yoqadi",
-    color: "bg-orange-100 text-orange-700",
-  },
-  I: {
-    label: "Tadqiqotchi",
-    desc: "Tahlil, fan, muammolarni hal qilish",
-    color: "bg-blue-100 text-blue-700",
-  },
-  A: {
-    label: "Ijodkor",
-    desc: "San'at, ijod, ifoda erkinligi",
-    color: "bg-purple-100 text-purple-700",
-  },
-  S: {
-    label: "Ijtimoiy",
-    desc: "Odamlar bilan ishlash, yordam berish",
-    color: "bg-green-100 text-green-700",
-  },
-  E: {
-    label: "Tadbirkor",
-    desc: "Rahbarlik, biznes, ta'sir ko'rsatish",
-    color: "bg-red-100 text-red-700",
-  },
-  C: { label: "Konventsion", desc: "Tartib, tizim, aniqlik", color: "bg-gray-100 text-gray-700" },
-};
-
-// ─── Temperament ta'riflari ────────────────────────────────────────────────
-const TEMP_INFO: Record<string, { emoji: string; desc: string; strong: string; develop: string }> =
-  {
-    Sangvinik: {
-      emoji: "😊",
-      desc: "Faol, ijtimoiy, xushchaqchaq",
-      strong: "Muloqotchanlik, moslashuvchanlik, optimizm",
-      develop: "Ishni oxiriga yetkazish, diqqatni jamlash",
-    },
-    Xolerik: {
-      emoji: "⚡",
-      desc: "Energik, qizg'in, tashabbuskor",
-      strong: "Liderlik, qat'iyatlilik, tez qaror qilish",
-      develop: "Sabr-toqat, hissiyotlarni boshqarish",
-    },
-    Flegmatik: {
-      emoji: "🧘",
-      desc: "Xotirjam, barqaror, ishonchli",
-      strong: "Chidamlilik, diqqatlilik, ishonchlilik",
-      develop: "Tashabbuskorlik, o'zgarishlarga moslashish",
-    },
-    Melanxolik: {
-      emoji: "🎨",
-      desc: "Sezgir, chuqur fikrlovchi, intiluvchi",
-      strong: "Ijodkorlik, tahliliy fikrlash, sezgirlik",
-      develop: "O'ziga ishonch, stressni boshqarish",
-    },
-  };
-
-// iqLabel/RADAR_COLORS → @/lib/profile-display; tiplar va data-qatlam → @/hooks/use-my-profile
+// HOLLAND_INFO, TEMP_INFO, iqLabel, RADAR_COLORS → @/lib/profile-display (takror emas);
+// tiplar va data-qatlam → @/hooks/use-my-profile
 
 function MyProfile() {
   const { user } = useAuth();

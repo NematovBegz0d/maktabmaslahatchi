@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { SubjectResults, type SubjectResult } from "@/components/subject-results";
 import { supabase } from "@/integrations/supabase/client";
-import { iqLabel, RADAR_COLORS } from "@/lib/profile-display";
+import { iqLabel, RADAR_COLORS, HOLLAND_INFO, TEMP_INFO } from "@/lib/profile-display";
 import { unwrap } from "@/lib/utils";
 import { IqDisclaimer } from "@/components/iq-disclaimer";
 import {
@@ -69,45 +69,7 @@ export const Route = createFileRoute("/students/$id")({
   ),
 });
 
-// ─── Holland kodi ta'riflari ───────────────────────────────────────────────
-const HOLLAND_INFO: Record<string, { label: string; desc: string; color: string }> = {
-  R: { label: "Realistik", desc: "Amaliy, texnik", color: "bg-orange-100 text-orange-700" },
-  I: { label: "Tadqiqotchi", desc: "Fan, tahlil", color: "bg-blue-100 text-blue-700" },
-  A: { label: "Ijodkor", desc: "San'at, ijod", color: "bg-purple-100 text-purple-700" },
-  S: { label: "Ijtimoiy", desc: "Odamlar, yordam", color: "bg-green-100 text-green-700" },
-  E: { label: "Tadbirkor", desc: "Rahbarlik, biznes", color: "bg-red-100 text-red-700" },
-  C: { label: "Konventsion", desc: "Tartib, tizim", color: "bg-gray-100 text-gray-700" },
-};
-
-const TEMP_INFO: Record<string, { emoji: string; desc: string; strong: string; develop: string }> =
-  {
-    Sangvinik: {
-      emoji: "😊",
-      desc: "Faol, ijtimoiy, xushchaqchaq",
-      strong: "Muloqotchanlik, moslashuvchanlik",
-      develop: "Diqqatni jamlash, ishni tugallash",
-    },
-    Xolerik: {
-      emoji: "⚡",
-      desc: "Energik, tashabbuskor",
-      strong: "Liderlik, tez qaror qilish",
-      develop: "Sabr, hissiyotlarni boshqarish",
-    },
-    Flegmatik: {
-      emoji: "🧘",
-      desc: "Xotirjam, barqaror",
-      strong: "Chidamlilik, ishonchlilik",
-      develop: "Tashabbuskorlik, o'zgarishlarga moslashish",
-    },
-    Melanxolik: {
-      emoji: "🎨",
-      desc: "Sezgir, chuqur fikrlovchi",
-      strong: "Ijodkorlik, tahliliy fikrlash",
-      develop: "O'ziga ishonch, stressni boshqarish",
-    },
-  };
-
-// iqLabel va RADAR_COLORS endi @/lib/profile-display'dan import qilinadi (takror emas)
+// HOLLAND_INFO, TEMP_INFO, iqLabel, RADAR_COLORS → @/lib/profile-display (takror emas)
 
 interface RadarItem {
   skill: string;
