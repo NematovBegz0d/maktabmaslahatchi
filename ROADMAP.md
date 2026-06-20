@@ -46,11 +46,11 @@
 - ✅/⚙️ **2.4** CAPTCHA: **kod to'liq ulangan** (frontend widget + token + backend verify; `.env.example` hujjatlangan). **Config (siz):** `TURNSTILE_SECRET_KEY` (Edge secret) + `VITE_TURNSTILE_SITE_KEY` (Netlify build) qo'ying → avtomatik yoqiladi.
 - ⏸️ **2.5** CORS allowlist — **ataylab keyinga qoldirildi** (JWT funksiyalar uchun `*` xavfsiz; domen yakunlangach `ALLOWED_ORIGINS` qo'yiladi).
 
-## BOSQICH 3 — Ishonchlilik va testlar 🔄
-- ✅ **3.1** `complete-session` orkestratsiyasi `_shared/complete.ts`ga (sof, deps-injected) ajratildi + 8 ta vitest testi (egalik, idempotentlik, natija→profil→yakunlash tartibi, xato-holatlar). `complete-session` v5 deploy (xulq-atvor o'zgarmagan). Jami test: **92**.
-- ✅ **3.2** AI kunlik-limit TOCTOU'si atomik qilindi: `ai_daily_usage` + `claim_ai_quota` (migratsiya prodda, tarix moslangan, `(true,true,false)` test); `analyze-profile` v4 deploy. *(types.ts regeneratsiyasi — kichik follow-up)*
-- ⬜ **3.3** CI'ga DB testlarini ulash; "yashil" majburiy.
-- ⬜ **3.4** Muhim rout/oqimlar uchun komponent testlari.
+## BOSQICH 3 — Ishonchlilik va testlar ✅
+- ✅ **3.1** `complete-session` orkestratsiyasi `_shared/complete.ts`ga (sof, deps-injected) ajratildi + 8 ta vitest testi (egalik, idempotentlik, natija→profil→yakunlash tartibi, xato-holatlar). `complete-session` v5 deploy (xulq-atvor o'zgarmagan).
+- ✅ **3.2** AI kunlik-limit TOCTOU'si atomik qilindi: `ai_daily_usage` + `claim_ai_quota` (migratsiya prodda, tarix moslangan); `analyze-profile` v4 deploy. *(types.ts regeneratsiyasi — kichik follow-up)*
+- ✅ **3.3** CI DB-testlari (`db-tests.yml` + `db-test.sh`) allaqachon bor edi; `claim_ai_quota` uchun yangi pgTAP test (`ai_quota.test.sql`) qo'shildi — limit, hisoblagich, per-user, per-day izolyatsiya. Mantiq live sxemada (rollback) tasdiqlandi.
+- ✅ **3.4** Reyting mantig'i testlari: `rating.ts` (`computeRating`, `rankEmoji`) + `school-stats.ts` (`schoolStatus`). Jami test: **103**.
 
 ## BOSQICH 4 — Kod sifati / arxitektura ⬜
 - ⬜ **4.1** Semiz rout fayllarni bo'lish (`index` 901, `students.$id` 830, `my-profile` 800...) → data-hook + dialog komponentlari.
