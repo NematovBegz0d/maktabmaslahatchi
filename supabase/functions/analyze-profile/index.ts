@@ -4,9 +4,10 @@
 // tushunarli tahlil (kuchli tomonlar, rivojlanish, 6 oylik reja)
 // yaratib, student_profiles.ai_summary ga saqlaydi.
 // ===================================================================
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
 import { callClaude } from "../_shared/claude.ts";
+import { adminClient, getCaller } from "../_shared/auth.ts";
+import { canAnalyze } from "../_shared/authz.ts";
 
 function ageFrom(birth: string | null): number | null {
   if (!birth) return null;
@@ -20,36 +21,34 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    // 1) Foydalanuvchini aniqlash
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userErr } = await userClient.auth.getUser();
-    if (userErr || !userData?.user) {
+    // 1) Chaqiruvchini aniqlash (rol + maktab bilan) — boshqa edge funksiyalar
+    //    bilan bir xil getCaller helperi orqali.
+    const admin = adminClient();
+    const caller = await getCaller(req, admin);
+    if (!caller) {
       return jsonResponse({ error: "Avtorizatsiya talab qilinadi" }, 401);
     }
-    const requesterId = userData.user.id;
+    const requesterId = caller.id;
 
     const body = await req.json().catch(() => ({}));
     const targetId: string = body?.studentId || requesterId;
     // force=true — keshni chetlab o'tib qayta yaratadi (lekin kunlik limit baribir amal qiladi)
     const force: boolean = body?.force === true;
 
-    const admin = createClient(SUPABASE_URL, SERVICE_KEY);
-
-    // 2) Agar boshqa oʻquvchi soʻralsa — rolni tekshirish (counselor/admin)
+    // 2) Boshqa oʻquvchi soʻralsa — ROL + MAKTAB tekshiruvi.
+    //    Counselor FAQAT o'z maktabi o'quvchisini tahlil qila oladi; admin — hammasini.
+    //    service_role RLS'ni chetlab o'tgani uchun bu tekshiruv funksiya ichida
+    //    MAJBURIY (delete-student / reset-student-password bilan izchil).
     if (targetId !== requesterId) {
-      const { data: roles } = await admin
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", requesterId);
-      const allowed = (roles ?? []).some((r) => r.role === "counselor" || r.role === "admin");
-      if (!allowed) return jsonResponse({ error: "Ruxsat yoʻq" }, 403);
+      const { data: targetProfile } = await admin
+        .from("profiles")
+        .select("school_id")
+        .eq("id", targetId)
+        .maybeSingle();
+      if (!targetProfile) return jsonResponse({ error: "Oʻquvchi topilmadi" }, 404);
+      if (!canAnalyze(caller, targetProfile.school_id, false)) {
+        return jsonResponse({ error: "Ruxsat yoʻq" }, 403);
+      }
     }
 
     // 3) Maʼlumotlarni yuklash
