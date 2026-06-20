@@ -84,6 +84,24 @@ export type Database = {
           },
         ];
       };
+      ai_daily_usage: {
+        Row: {
+          cnt: number;
+          usage_date: string;
+          user_id: string;
+        };
+        Insert: {
+          cnt?: number;
+          usage_date: string;
+          user_id: string;
+        };
+        Update: {
+          cnt?: number;
+          usage_date?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       answers: {
         Row: {
           answer_value: Json;
