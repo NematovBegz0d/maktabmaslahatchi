@@ -68,7 +68,9 @@ for (const m of pubBlock.matchAll(/^ {6}(\w+): \{/gm)) typesKeys.add(m[1]);
 // ─── 4. Coverage ────────────────────────────────────────────────────────────
 for (const t of [...createdTables].sort()) {
   if (!typesKeys.has(t)) {
-    errors.push(`DRIFT: '${t}' jadvali migratsiyada bor, lekin types.ts'da YO'Q → npm run gen:types`);
+    errors.push(
+      `DRIFT: '${t}' jadvali migratsiyada bor, lekin types.ts'da YO'Q → npm run gen:types`,
+    );
   }
 }
 for (const v of [...createdViews].sort()) {
