@@ -21,17 +21,17 @@ interface Body {
   captcha_token?: string | null;
 }
 
-// Reverse-proxy ortidagi haqiqiy mijoz IP'si.
-// MUHIM: x-forwarded-for'ning BIRINCHI qiymatini mijozning o'zi o'rnatishi
-// mumkin (spoofing). Ishonchli infratuzilma haqiqiy IP'ni ro'yxatning OXIRIGA
-// qo'shadi — shuning uchun oxirgi qiymatni olamiz.
+// Reverse-proxy ortidagi mijoz IP'si.
+// Supabase Edge (Deno) infratuzilmasida haqiqiy mijoz IP'si x-forwarded-for
+// ro'yxatining BIRINCHI qiymatida bo'ladi. (Avvalgi "oxirgi qiymat" varianti
+// AWS ALB kabi tuzilmalar uchun to'g'ri, lekin Supabase'da emas — u yerda
+// oxirgi qiymat ichki proksi IP'si bo'lib, BARCHA so'rovga bir xil tushadi va
+// IP-limit global blokga aylanadi.) IP — yumshoq signal; asosiy himoya
+// telefon-cooldown + (yoqilgan bo'lsa) Turnstile CAPTCHA.
 function clientIp(req: Request): string {
   const xff = req.headers.get("x-forwarded-for") ?? "";
-  const parts = xff
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (parts.length > 0) return parts[parts.length - 1];
+  const first = xff.split(",")[0]?.trim();
+  if (first) return first;
   return req.headers.get("x-real-ip")?.trim() || "unknown";
 }
 
