@@ -52,9 +52,9 @@
 - ✅ **3.3** CI DB-testlari (`db-tests.yml` + `db-test.sh`) allaqachon bor edi; `claim_ai_quota` uchun yangi pgTAP test (`ai_quota.test.sql`) qo'shildi — limit, hisoblagich, per-user, per-day izolyatsiya. Mantiq live sxemada (rollback) tasdiqlandi.
 - ✅ **3.4** Reyting mantig'i testlari: `rating.ts` (`computeRating`, `rankEmoji`) + `school-stats.ts` (`schoolStatus`). Jami test: **103**.
 
-## BOSQICH 4 — Kod sifati / arxitektura ⬜
+## BOSQICH 4 — Kod sifati / arxitektura 🔄
 - ⬜ **4.1** Semiz rout fayllarni bo'lish (`index` 901, `students.$id` 830, `my-profile` 800...) → data-hook + dialog komponentlari.
-- ⬜ **4.2** `auth_rls_initplan` (24 eski policy) `(select auth.uid())` ga o'rab tuzatish.
+- ✅ **4.2** `auth_rls_initplan`: 24 ta eski policy (clubs/council/achievements/enrollments/club_members) `(select auth.uid())` / `(select has_role(...))` ga o'raldi (migratsiya prodda, tarix moslangan). Tasdiq: o'ralmagan = 0, policy soni o'zgarmagan. Xulq-atvor bir xil.
 - ⬜ **4.3** `analytics.tsx` va boshqa chuqur o'qilmagan rout'larni ko'rib chiqish; takror naqshlarni konsolidatsiya.
 
 ## BOSQICH 5 — Performance / masshtab ⬜
