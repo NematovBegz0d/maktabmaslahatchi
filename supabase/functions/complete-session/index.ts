@@ -4,16 +4,15 @@
 // student_profiles (radar, IQ, top kasblar) ni yangilaydi.
 // Faqat service_role himoyalangan jadvallarga (answer keys, results)
 // kira oladi — shuning uchun ball hisoblash SERVERDA bo'ladi.
+//
+// Orkestratsiya mantig'i _shared/complete.ts'da (sof, vitest bilan qoplangan).
+// Bu fayl: auth + HTTP + Supabase adapter (DB I/O).
 // ===================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
-import { scoreTest, type AnswerMap, type KeyMap, type QuestionLite } from "../_shared/scoring.ts";
-import {
-  aggregateProfile,
-  matchCareers,
-  type CareerRow,
-  type ResultRow,
-} from "../_shared/profile.ts";
+import type { AnswerMap, KeyMap, QuestionLite } from "../_shared/scoring.ts";
+import type { CareerRow, ResultRow } from "../_shared/profile.ts";
+import { runCompleteSession, type CompleteDeps, type SessionRow } from "../_shared/complete.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -45,164 +44,112 @@ Deno.serve(async (req: Request) => {
     // 3) Admin klient (service_role) — himoyalangan ma'lumotlar uchun
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
 
-    // 4) Sessiyani yuklash va egaligini tekshirish
-    const { data: session } = await admin
-      .from("test_sessions")
-      .select("id, student_id, test_id, status")
-      .eq("id", sessionId)
-      .maybeSingle();
-
-    if (!session) return jsonResponse({ error: "Sessiya topilmadi" }, 404);
-    if (session.student_id !== userId) {
-      return jsonResponse({ error: "Bu sessiya sizga tegishli emas" }, 403);
-    }
-
-    // 4b) Idempotentlik: sessiya allaqachon yakunlangan bo'lsa, qayta
-    // hisoblamaymiz. Bu ikki marta bosish / parallel so'rovlar (poyga holati)
-    // qayta ishlashning oldini oladi.
-    if (session.status === "completed") {
-      return jsonResponse({ ok: true, alreadyCompleted: true });
-    }
-
-    // 5) Test turi
-    const { data: test } = await admin
-      .from("tests")
-      .select("id, test_type, name_uz")
-      .eq("id", session.test_id)
-      .maybeSingle();
-    const testType = test?.test_type ?? "generic";
-
-    // 6) Savollar
-    const { data: questions } = await admin
-      .from("questions")
-      .select("id, subscale, question_type, options")
-      .eq("test_id", session.test_id);
-    const qs = (questions ?? []) as QuestionLite[];
-
-    // 7) Javoblar -> { questionId: value }
-    const { data: answerRows } = await admin
-      .from("answers")
-      .select("question_id, answer_value")
-      .eq("session_id", sessionId);
-    const answers: AnswerMap = {};
-    for (const a of answerRows ?? []) {
-      const v = (a.answer_value as { v?: number })?.v;
-      if (typeof v === "number") answers[a.question_id] = v;
-    }
-
-    // 8) To'g'ri javoblar (faqat IQ testlar uchun, service_role o'qiydi)
-    const keys: KeyMap = {};
-    if (testType === "raven" || testType === "math_iq" || testType === "subject") {
-      const qIds = qs.map((q) => q.id);
-      const { data: keyRows } = await admin
-        .from("question_answer_keys")
-        .select("question_id, correct_answer")
-        .in("question_id", qIds);
-      for (const k of keyRows ?? []) {
-        const v = (k.correct_answer as { v?: number })?.v;
-        if (typeof v === "number") keys[k.question_id] = v;
-      }
-    }
-
-    // 9) Ball hisoblash
-    const result = scoreTest(testType, qs, answers, keys);
-
-    // 10) Natijani ATOMIK yozish — DELETE+INSERT o'rniga UPSERT
-    // (ux_test_results_student_test unique indeksiga tayanadi). Bu ma'lumot
-    // yo'qolish oynasini (insert xato bersa eski natija ketardi) va dublikat
-    // qatorlarni butunlay yo'qotadi.
-    const { error: resultErr } = await admin.from("test_results").upsert(
-      {
-        student_id: userId,
-        test_id: session.test_id,
-        raw_scores: result.rawScores,
-        scaled_scores: result.scaledScores,
-        personality_type: result.personalityType,
-        holland_code: result.hollandCode,
+    // 4) Supabase adapter — orkestratsiyaga DB amallarini ulaydi
+    const deps: CompleteDeps = {
+      async getSession(id) {
+        const { data } = await admin
+          .from("test_sessions")
+          .select("id, student_id, test_id, status")
+          .eq("id", id)
+          .maybeSingle();
+        return (data as SessionRow | null) ?? null;
       },
-      { onConflict: "student_id,test_id" },
-    );
-    if (resultErr) {
-      console.error("[complete-session] test_results upsert:", resultErr.message);
-      return jsonResponse({ error: "Natijani saqlashda xatolik" }, 500);
-    }
-
-    // 11) Yig'ma profilni qayta qurish (barcha natijalar asosida)
-    const { data: allResults } = await admin
-      .from("test_results")
-      .select(
-        "test_id, raw_scores, scaled_scores, personality_type, holland_code, tests(test_type)",
-      )
-      .eq("student_id", userId);
-
-    const normalized: ResultRow[] = (allResults ?? []).map((r) => ({
-      test_id: r.test_id,
-      raw_scores: r.raw_scores as Record<string, number> | null,
-      scaled_scores: r.scaled_scores as Record<string, number> | null,
-      personality_type: r.personality_type,
-      holland_code: r.holland_code,
-      test_type: (r.tests as { test_type?: string } | null)?.test_type ?? null,
-    }));
-
-    const { count: totalTests } = await admin
-      .from("tests")
-      .select("id", { count: "exact", head: true })
-      .eq("is_active", true);
-
-    const agg = aggregateProfile(normalized, totalTests ?? 8);
-
-    // 12) Kasb mosligi (Holland kodi asosida)
-    const { data: careers } = await admin
-      .from("careers")
-      .select(
-        "id, name_uz, description, holland_codes, required_skills, salary_range, universities",
-      );
-    const topCareers = matchCareers(agg.holland_code, (careers ?? []) as CareerRow[]);
-
-    // 13) student_profiles upsert (radar, IQ, top kasblar keshi)
-    const { error: profileErr } = await admin.from("student_profiles").upsert(
-      {
-        student_id: userId,
-        radar_scores: agg.radar_scores,
-        iq_scores: agg.iq_scores,
-        top_careers: topCareers,
-        profile_completeness: agg.profile_completeness,
-        updated_at: new Date().toISOString(),
+      async getTestType(testId) {
+        const { data } = await admin
+          .from("tests")
+          .select("id, test_type, name_uz")
+          .eq("id", testId)
+          .maybeSingle();
+        return (data?.test_type as string | undefined) ?? "generic";
       },
-      { onConflict: "student_id" },
-    );
-    if (profileErr) {
-      console.error("[complete-session] student_profiles upsert:", profileErr.message);
-      return jsonResponse({ error: "Profilni yangilashda xatolik" }, 500);
-    }
-
-    // 14) Sessiyani ENG OXIRIDA yakunlaymiz — faqat yuqoridagi yozuvlar
-    // muvaffaqiyatli bo'lsagina. Aks holda sessiya "completed" bo'lmay qoladi,
-    // qayta urinish esa to'liq qayta hisoblaydi (idempotentlik buzilmaydi).
-    const { error: sessionErr } = await admin
-      .from("test_sessions")
-      .update({ status: "completed", completed_at: new Date().toISOString() })
-      .eq("id", sessionId);
-    if (sessionErr) {
-      console.error("[complete-session] session update:", sessionErr.message);
-      return jsonResponse({ error: "Sessiyani yakunlashda xatolik" }, 500);
-    }
-
-    return jsonResponse({
-      ok: true,
-      testType,
-      result: {
-        rawScores: result.rawScores,
-        scaledScores: result.scaledScores,
-        personalityType: result.personalityType,
-        hollandCode: result.hollandCode,
+      async getQuestions(testId) {
+        const { data } = await admin
+          .from("questions")
+          .select("id, subscale, question_type, options")
+          .eq("test_id", testId);
+        return (data ?? []) as QuestionLite[];
       },
-      profile: {
-        completeness: agg.profile_completeness,
-        hollandCode: agg.holland_code,
-        topCareers: topCareers.map((c) => c.name_uz),
+      async getAnswers(id) {
+        const { data } = await admin
+          .from("answers")
+          .select("question_id, answer_value")
+          .eq("session_id", id);
+        const answers: AnswerMap = {};
+        for (const a of data ?? []) {
+          const v = (a.answer_value as { v?: number })?.v;
+          if (typeof v === "number") answers[a.question_id] = v;
+        }
+        return answers;
       },
-    });
+      async getKeys(questionIds) {
+        const keys: KeyMap = {};
+        const { data } = await admin
+          .from("question_answer_keys")
+          .select("question_id, correct_answer")
+          .in("question_id", questionIds);
+        for (const k of data ?? []) {
+          const v = (k.correct_answer as { v?: number })?.v;
+          if (typeof v === "number") keys[k.question_id] = v;
+        }
+        return keys;
+      },
+      async upsertResult(row) {
+        const { error } = await admin
+          .from("test_results")
+          .upsert(row, { onConflict: "student_id,test_id" });
+        if (error) console.error("[complete-session] test_results upsert:", error.message);
+        return { error: error?.message ?? null };
+      },
+      async getAllResults(studentId) {
+        const { data } = await admin
+          .from("test_results")
+          .select(
+            "test_id, raw_scores, scaled_scores, personality_type, holland_code, tests(test_type)",
+          )
+          .eq("student_id", studentId);
+        return (data ?? []).map((r) => ({
+          test_id: r.test_id,
+          raw_scores: r.raw_scores as Record<string, number> | null,
+          scaled_scores: r.scaled_scores as Record<string, number> | null,
+          personality_type: r.personality_type,
+          holland_code: r.holland_code,
+          test_type: (r.tests as { test_type?: string } | null)?.test_type ?? null,
+        })) as ResultRow[];
+      },
+      async countActiveTests() {
+        const { count } = await admin
+          .from("tests")
+          .select("id", { count: "exact", head: true })
+          .eq("is_active", true);
+        return count ?? 8;
+      },
+      async getCareers() {
+        const { data } = await admin
+          .from("careers")
+          .select(
+            "id, name_uz, description, holland_codes, required_skills, salary_range, universities",
+          );
+        return (data ?? []) as CareerRow[];
+      },
+      async upsertProfile(row) {
+        const { error } = await admin
+          .from("student_profiles")
+          .upsert({ ...row, updated_at: new Date().toISOString() }, { onConflict: "student_id" });
+        if (error) console.error("[complete-session] student_profiles upsert:", error.message);
+        return { error: error?.message ?? null };
+      },
+      async markCompleted(id) {
+        const { error } = await admin
+          .from("test_sessions")
+          .update({ status: "completed", completed_at: new Date().toISOString() })
+          .eq("id", id);
+        if (error) console.error("[complete-session] session update:", error.message);
+        return { error: error?.message ?? null };
+      },
+    };
+
+    const outcome = await runCompleteSession(deps, userId, sessionId);
+    return jsonResponse(outcome.body, outcome.status);
   } catch (e) {
     console.error("[complete-session] error:", e);
     return jsonResponse({ error: String(e) }, 500);

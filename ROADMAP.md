@@ -47,7 +47,7 @@
 - ⏸️ **2.5** CORS allowlist — **ataylab keyinga qoldirildi** (JWT funksiyalar uchun `*` xavfsiz; domen yakunlangach `ALLOWED_ORIGINS` qo'yiladi).
 
 ## BOSQICH 3 — Ishonchlilik va testlar 🔄
-- ⬜ **3.1** `complete-session` uchun integratsiya testi (Deno test yoki pgTAP).
+- ✅ **3.1** `complete-session` orkestratsiyasi `_shared/complete.ts`ga (sof, deps-injected) ajratildi + 8 ta vitest testi (egalik, idempotentlik, natija→profil→yakunlash tartibi, xato-holatlar). `complete-session` v5 deploy (xulq-atvor o'zgarmagan). Jami test: **92**.
 - ✅ **3.2** AI kunlik-limit TOCTOU'si atomik qilindi: `ai_daily_usage` + `claim_ai_quota` (migratsiya prodda, tarix moslangan, `(true,true,false)` test); `analyze-profile` v4 deploy. *(types.ts regeneratsiyasi — kichik follow-up)*
 - ⬜ **3.3** CI'ga DB testlarini ulash; "yashil" majburiy.
 - ⬜ **3.4** Muhim rout/oqimlar uchun komponent testlari.
