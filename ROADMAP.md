@@ -30,29 +30,25 @@
 - ✅ **0.3** `tsc + lint + test` yashil (84/84).
 - ✅ **0.4** Deploy runbook yozildi (pastdagi Bosqich 1).
 
-## BOSQICH 1 — Production'ni repo bilan xavfsiz sinxronlash ⬜  ⚠️ prod o'zgaradi (ruxsat bilan)
-> ⚠️ TARTIB MUHIM: avval migratsiya, KEYIN funksiya. Teskari qilsangiz prod buziladi.
->
-> **Runbook (aniq tartib):**
-> 1. `supabase db push` — 3 migratsiyani qo'llaydi (`test_results_unique` → `application_phone_normalized` → `lock_activity_log_insert`).
-> 2. Tasdiqlash: `test_results`'da `(student_id,test_id)` unique indeks va `club_applications.phone_normalized` ustun paydo bo'lganini tekshirish.
-> 3. `supabase functions deploy` — BARCHA funksiyalar (yangi `reset-student-password` ham, `config.toml`'da `verify_jwt=true` bilan).
-> 4. Secrets tekshirish: `ANTHROPIC_API_KEY`, ixtiyoriy `TURNSTILE_SECRET_KEY`/`VITE_TURNSTILE_SITE_KEY`, `ALLOWED_ORIGINS`.
+## BOSQICH 1 — Production'ni repo bilan xavfsiz sinxronlash ✅ (2026-06-19, MCP orqali)
+> Migratsiya → funksiya tartibida bajarildi. Endi prod = repo.
 
-- ⬜ **1.1** 3 migratsiyani tartibda qo'llash.
-- ⬜ **1.2** Migratsiyadan SO'NG barcha edge funksiyalarni qayta deploy qilish (yangi `reset-student-password` bilan).
-- ⬜ **1.3** Smoke-test: test yakunlash 200 qaytaradimi; ariza yuborish ishlaydimi; o'quvchi parol-tiklash ishlaydimi; advisor qayta tekshirish.
+- ✅ **1.1** 3 migratsiya prodga qo'llandi (lock_activity_log → test_results_unique → phone_normalized); migratsiya tarixi repo versiyalariga moslandi (20260618*).
+- ✅ **1.2** Funksiyalar: `complete-session` (v4, atomik upsert), `submit-application` (v2, phone_normalized+first-XFF+CAPTCHA), yangi `reset-student-password` (v1) deploy qilindi. Qolgan 4 admin funksiyasi tekshirildi — allaqachon repo bilan mos (June 16).
+- ✅ **1.3** Smoke-test: submit-application bo'sh body → 400 (yozmadi); complete-session → 401 gateway; ma'lumot butun (results=5, apps=0). Sxema: unique indeks + phone_normalized + trigger tasdiqlandi.
 
-## BOSQICH 2 — Kritik xavfsizlik / operatsion bo'shliqlar 🔄
-- ✅ **2.1** O'quvchi parol-tiklash: edge funksiya (`reset-student-password`) + frontend tugma/oyna ([students.$id.tsx](src/routes/students.$id.tsx)) tayyor. *(deploy Bosqich 1'da)*
-- ⬜ **2.2** Leaked-password protection yoqish (Supabase Auth, HaveIBeenPwned).
-- ⬜ **2.3** Login lockout'ni serverga ko'chirish yoki Supabase rate-limitga tayanib hujjatlash.
-- ⬜ **2.4** CAPTCHA: Turnstile kalitlarini o'rnatish YOKI ataylab o'chiqligini hujjatlash.
-- ⬜ **2.5** CORS allowlist (`ALLOWED_ORIGINS`) — domen barqarorlashgach.
+## BOSQICH 2 — Kritik xavfsizlik / operatsion bo'shliqlar ✅ (kod) / ⚙️ (config sizda)
+> Kod tomoni TUGADI. Qolgani — akkaunt-darajadagi konfiguratsiya (MCP'dan qilib bo'lmaydi).
 
-## BOSQICH 3 — Ishonchlilik va testlar ⬜
+- ✅ **2.1** O'quvchi parol-tiklash: `reset-student-password` (deploy qilingan) + frontend tugma/oyna.
+- ⚙️ **2.2** Leaked-password protection — **config (siz):** Dashboard → Authentication → Password protection → yoqish. ([hujjat](https://supabase.com/docs/guides/auth/password-security))
+- ✅/⚙️ **2.3** Login brute-force: haqiqiy himoya = Supabase Auth rate-limit (Dashboard → Auth → Rate Limits). Client 30s lockout — faqat UX (reload'da nollanadi, to'g'ridan-to'g'ri API'ni to'xtatmaydi); ataylab shunday.
+- ✅/⚙️ **2.4** CAPTCHA: **kod to'liq ulangan** (frontend widget + token + backend verify; `.env.example` hujjatlangan). **Config (siz):** `TURNSTILE_SECRET_KEY` (Edge secret) + `VITE_TURNSTILE_SITE_KEY` (Netlify build) qo'ying → avtomatik yoqiladi.
+- ⏸️ **2.5** CORS allowlist — **ataylab keyinga qoldirildi** (JWT funksiyalar uchun `*` xavfsiz; domen yakunlangach `ALLOWED_ORIGINS` qo'yiladi).
+
+## BOSQICH 3 — Ishonchlilik va testlar 🔄
 - ⬜ **3.1** `complete-session` uchun integratsiya testi (Deno test yoki pgTAP).
-- ⬜ **3.2** Rate-limit TOCTOU'ni atomik qilish (kritik: AI xarajati — DB hisoblagich/lock).
+- ✅ **3.2** AI kunlik-limit TOCTOU'si atomik qilindi: `ai_daily_usage` + `claim_ai_quota` (migratsiya prodda, tarix moslangan, `(true,true,false)` test); `analyze-profile` v4 deploy. *(types.ts regeneratsiyasi — kichik follow-up)*
 - ⬜ **3.3** CI'ga DB testlarini ulash; "yashil" majburiy.
 - ⬜ **3.4** Muhim rout/oqimlar uchun komponent testlari.
 

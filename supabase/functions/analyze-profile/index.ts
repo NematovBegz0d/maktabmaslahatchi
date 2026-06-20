@@ -97,17 +97,20 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ ok: true, aiSummary: sp.ai_summary, cached: true });
     }
 
-    // 3.6) KUNLIK LIMIT — chaqiruvchi 24 soatda ko'pi bilan DAILY_LIMIT marta yangi tahlil yaratadi.
-    // (kesh qaytgan holatlar bu yerga yetib kelmaydi — faqat haqiqiy Claude chaqiruvi sanaladi)
+    // 3.6) KUNLIK LIMIT — ATOMIK (TOCTOU poygasi yo'q). claim_ai_quota bitta SQL
+    // statement'da bugungi hisoblagichni oshiradi va limit ichidami yoʻqligini
+    // qaytaradi — parallel soʻrovlar ham limitdan oshib ketolmaydi. Kvota Claude
+    // chaqiruvidan OLDIN olinadi (kesh qaytgan holatlar bu yerga yetmaydi).
     const DAILY_LIMIT = 5;
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const { count: usedToday } = await admin
-      .from("activity_log")
-      .select("id", { count: "exact", head: true })
-      .eq("actor_id", requesterId)
-      .eq("action", "ai_generated")
-      .gte("created_at", since);
-    if ((usedToday ?? 0) >= DAILY_LIMIT) {
+    const { data: quotaOk, error: quotaErr } = await admin.rpc("claim_ai_quota", {
+      _user_id: requesterId,
+      _limit: DAILY_LIMIT,
+    });
+    if (quotaErr) {
+      console.error("[analyze-profile] claim_ai_quota:", quotaErr.message);
+      return jsonResponse({ error: "Limitni tekshirishda xatolik" }, 500);
+    }
+    if (quotaOk !== true) {
       return jsonResponse(
         { error: `Kunlik AI tahlil limiti (${DAILY_LIMIT}) tugadi. Ertaga qayta urinib ko'ring.` },
         429,
@@ -169,7 +172,7 @@ Quyidagi tuzilmada, Markdown formatida yoz:
         { onConflict: "student_id" },
       );
 
-    // 7) Xarajat hisobi uchun jurnalga yozish — kunlik limit shu yozuvlardan sanaladi
+    // 7) Audit uchun faoliyat jurnaliga yozish (kunlik limit endi claim_ai_quota'da).
     await admin.from("activity_log").insert({
       actor_id: requesterId,
       action: "ai_generated",
