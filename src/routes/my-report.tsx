@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AISummary } from "@/components/ai-summary";
 import { supabase } from "@/integrations/supabase/client";
 import { unwrap } from "@/lib/utils";
+import { HOLLAND_INFO, TEMP_INFO, iqLabel } from "@/lib/profile-display";
 import { useAuth } from "@/hooks/use-auth";
 import { IqDisclaimer } from "@/components/iq-disclaimer";
 import {
@@ -31,41 +32,7 @@ export const Route = createFileRoute("/my-report")({
   ),
 });
 
-const HOLLAND_INFO: Record<string, { label: string; desc: string }> = {
-  R: { label: "Realistik", desc: "Amaliy, texnik, jismoniy ish" },
-  I: { label: "Tadqiqotchi", desc: "Tahlil, fan, muammolarni hal qilish" },
-  A: { label: "Ijodkor", desc: "San'at, ijod, ifoda erkinligi" },
-  S: { label: "Ijtimoiy", desc: "Odamlar bilan ishlash, yordam berish" },
-  E: { label: "Tadbirkor", desc: "Rahbarlik, biznes, ta'sir ko'rsatish" },
-  C: { label: "Konventsion", desc: "Tartib, tizim, aniqlik" },
-};
-
-const TEMP_INFO: Record<string, { desc: string; strong: string }> = {
-  Sangvinik: {
-    desc: "Faol, ijtimoiy, xushchaqchaq",
-    strong: "Muloqotchanlik, moslashuvchanlik, optimizm",
-  },
-  Xolerik: {
-    desc: "Energik, qizg'in, tashabbuskor",
-    strong: "Liderlik, qat'iyatlilik, tez qaror qilish",
-  },
-  Flegmatik: {
-    desc: "Xotirjam, barqaror, ishonchli",
-    strong: "Chidamlilik, diqqatlilik, ishonchlilik",
-  },
-  Melanxolik: {
-    desc: "Sezgir, chuqur fikrlovchi",
-    strong: "Ijodkorlik, tahliliy fikrlash, sezgirlik",
-  },
-};
-
-function iqLabel(score: number) {
-  if (score >= 130) return "A'lo darajali";
-  if (score >= 115) return "Yuqori";
-  if (score >= 100) return "O'rtadan yuqori";
-  if (score >= 85) return "O'rtacha";
-  return "Rivojlantirilishi kerak";
-}
+// HOLLAND_INFO, TEMP_INFO, iqLabel → @/lib/profile-display (yagona manba; takror emas)
 
 interface RadarItem {
   skill: string;
@@ -310,7 +277,7 @@ function MyReport() {
                     {iqData.map((item) => (
                       <p key={item.type} className="text-xs text-slate-500">
                         <span className="font-semibold text-slate-700">{item.type}:</span>{" "}
-                        <span className="font-semibold text-slate-700">{iqLabel(item.score)}</span>{" "}
+                        <span className="font-semibold text-slate-700">{iqLabel(item.score).text}</span>{" "}
                         (~
                         {item.score} taxminiy)
                       </p>
