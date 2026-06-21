@@ -33,7 +33,12 @@ export default tseslint.config(
         },
       ],
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-      "@typescript-eslint/no-unused-vars": "off",
+      // Ishlatilmagan o'zgaruvchi/import = error (oldin "off" edi — o'lik kod o'tib ketardi).
+      // _ bilan boshlanadiganlar ataylab ishlatilmaydi (ignore).
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
     },
   },
   eslintPluginPrettier,
