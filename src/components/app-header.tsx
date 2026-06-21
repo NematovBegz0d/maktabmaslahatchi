@@ -34,7 +34,7 @@ export function AppHeader() {
   const navigate = useNavigate();
   const { role } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
-  const { locale, setLocale, t } = useI18n();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   // Rol hali yuklanmaganda (null) rolga bog'liq havolalarni ko'rsatmaymiz —
   // aks holda o'quvchi havolalari bir lahza "flash" qilib keyin yo'qoladi.
@@ -182,18 +182,9 @@ export function AppHeader() {
           ))}
         </nav>
 
-        {/* O'ng taraf: bildirishnoma (maslahatchi), til, mavzu, chiqish */}
+        {/* O'ng taraf: bildirishnoma (maslahatchi), mavzu, chiqish */}
         <div className="flex items-center gap-1">
           {roleKnown && isCounselor && <NotificationBell />}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setLocale(locale === "uz" ? "ru" : "uz")}
-            aria-label={locale === "uz" ? "Rus tiliga o'tish" : "O'zbek tiliga o'tish"}
-            className="text-xs font-semibold"
-          >
-            {locale === "uz" ? "RU" : "UZ"}
-          </Button>
           <Button
             variant="ghost"
             size="sm"
