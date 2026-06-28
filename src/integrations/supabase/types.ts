@@ -141,6 +141,98 @@ export type Database = {
           },
         ];
       };
+      bilimnoma_categories: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          icon: string;
+          id: string;
+          is_published: boolean;
+          section: string;
+          sort_order: number;
+          title: string;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          icon?: string;
+          id?: string;
+          is_published?: boolean;
+          section: string;
+          sort_order?: number;
+          title: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          icon?: string;
+          id?: string;
+          is_published?: boolean;
+          section?: string;
+          sort_order?: number;
+          title?: string;
+        };
+        Relationships: [];
+      };
+      bilimnoma_entries: {
+        Row: {
+          body: string | null;
+          category_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          demand: string | null;
+          details: Json;
+          icon: string;
+          id: string;
+          image_url: string | null;
+          is_published: boolean;
+          section: string;
+          sort_order: number;
+          summary: string | null;
+          title: string;
+        };
+        Insert: {
+          body?: string | null;
+          category_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          demand?: string | null;
+          details?: Json;
+          icon?: string;
+          id?: string;
+          image_url?: string | null;
+          is_published?: boolean;
+          section: string;
+          sort_order?: number;
+          summary?: string | null;
+          title: string;
+        };
+        Update: {
+          body?: string | null;
+          category_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          demand?: string | null;
+          details?: Json;
+          icon?: string;
+          id?: string;
+          image_url?: string | null;
+          is_published?: boolean;
+          section?: string;
+          sort_order?: number;
+          summary?: string | null;
+          title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "bilimnoma_entries_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "bilimnoma_categories";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       careers: {
         Row: {
           created_at: string;

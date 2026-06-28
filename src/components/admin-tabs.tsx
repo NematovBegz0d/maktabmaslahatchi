@@ -10,6 +10,7 @@ import {
   Newspaper,
   Landmark,
   Inbox,
+  BookOpen,
 } from "lucide-react";
 
 // Super admin paneli ichki navigatsiyasi
@@ -22,6 +23,7 @@ const TABS = [
   { to: "/admin/rating" as const, icon: Trophy, label: "Reyting" },
   { to: "/admin/news" as const, icon: Newspaper, label: "Yangiliklar" },
   { to: "/admin/center-clubs" as const, icon: Landmark, label: "To'garaklar" },
+  { to: "/admin/bilimnoma" as const, icon: BookOpen, label: "Bilimnoma" },
   { to: "/admin/applications" as const, icon: Inbox, label: "Arizalar" },
   { to: "/admin/activity" as const, icon: ScrollText, label: "Jurnal" },
 ];

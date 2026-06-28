@@ -26,11 +26,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentsIndexRouteImport } from './routes/students.index'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as ClubsIndexRouteImport } from './routes/clubs.index'
+import { Route as BilimnomaIndexRouteImport } from './routes/bilimnoma.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TestIdRouteImport } from './routes/test.$id'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as NewsIdRouteImport } from './routes/news.$id'
 import { Route as ClubsIdRouteImport } from './routes/clubs.$id'
+import { Route as BilimnomaSectionRouteImport } from './routes/bilimnoma.$section'
 import { Route as AdminTasksRouteImport } from './routes/admin.tasks'
 import { Route as AdminSchoolsRouteImport } from './routes/admin.schools'
 import { Route as AdminRatingRouteImport } from './routes/admin.rating'
@@ -38,8 +40,10 @@ import { Route as AdminNewsRouteImport } from './routes/admin.news'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminCounselorsRouteImport } from './routes/admin.counselors'
 import { Route as AdminCenterClubsRouteImport } from './routes/admin.center-clubs'
+import { Route as AdminBilimnomaRouteImport } from './routes/admin.bilimnoma'
 import { Route as AdminApplicationsRouteImport } from './routes/admin.applications'
 import { Route as AdminActivityRouteImport } from './routes/admin.activity'
+import { Route as BilimnomaSectionIdRouteImport } from './routes/bilimnoma.$section_.$id'
 
 const TestsManageRoute = TestsManageRouteImport.update({
   id: '/tests-manage',
@@ -126,6 +130,11 @@ const ClubsIndexRoute = ClubsIndexRouteImport.update({
   path: '/clubs/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BilimnomaIndexRoute = BilimnomaIndexRouteImport.update({
+  id: '/bilimnoma/',
+  path: '/bilimnoma/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -149,6 +158,11 @@ const NewsIdRoute = NewsIdRouteImport.update({
 const ClubsIdRoute = ClubsIdRouteImport.update({
   id: '/clubs/$id',
   path: '/clubs/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BilimnomaSectionRoute = BilimnomaSectionRouteImport.update({
+  id: '/bilimnoma/$section',
+  path: '/bilimnoma/$section',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminTasksRoute = AdminTasksRouteImport.update({
@@ -186,6 +200,11 @@ const AdminCenterClubsRoute = AdminCenterClubsRouteImport.update({
   path: '/admin/center-clubs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminBilimnomaRoute = AdminBilimnomaRouteImport.update({
+  id: '/admin/bilimnoma',
+  path: '/admin/bilimnoma',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
   id: '/admin/applications',
   path: '/admin/applications',
@@ -194,6 +213,11 @@ const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
 const AdminActivityRoute = AdminActivityRouteImport.update({
   id: '/admin/activity',
   path: '/admin/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BilimnomaSectionIdRoute = BilimnomaSectionIdRouteImport.update({
+  id: '/bilimnoma/$section_/$id',
+  path: '/bilimnoma/$section/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -214,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/tests-manage': typeof TestsManageRoute
   '/admin/activity': typeof AdminActivityRoute
   '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/bilimnoma': typeof AdminBilimnomaRoute
   '/admin/center-clubs': typeof AdminCenterClubsRoute
   '/admin/counselors': typeof AdminCounselorsRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -221,14 +246,17 @@ export interface FileRoutesByFullPath {
   '/admin/rating': typeof AdminRatingRoute
   '/admin/schools': typeof AdminSchoolsRoute
   '/admin/tasks': typeof AdminTasksRoute
+  '/bilimnoma/$section': typeof BilimnomaSectionRoute
   '/clubs/$id': typeof ClubsIdRoute
   '/news/$id': typeof NewsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/test/$id': typeof TestIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/bilimnoma/': typeof BilimnomaIndexRoute
   '/clubs/': typeof ClubsIndexRoute
   '/news/': typeof NewsIndexRoute
   '/students/': typeof StudentsIndexRoute
+  '/bilimnoma/$section/$id': typeof BilimnomaSectionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -247,6 +275,7 @@ export interface FileRoutesByTo {
   '/tests-manage': typeof TestsManageRoute
   '/admin/activity': typeof AdminActivityRoute
   '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/bilimnoma': typeof AdminBilimnomaRoute
   '/admin/center-clubs': typeof AdminCenterClubsRoute
   '/admin/counselors': typeof AdminCounselorsRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -254,14 +283,17 @@ export interface FileRoutesByTo {
   '/admin/rating': typeof AdminRatingRoute
   '/admin/schools': typeof AdminSchoolsRoute
   '/admin/tasks': typeof AdminTasksRoute
+  '/bilimnoma/$section': typeof BilimnomaSectionRoute
   '/clubs/$id': typeof ClubsIdRoute
   '/news/$id': typeof NewsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/test/$id': typeof TestIdRoute
   '/admin': typeof AdminIndexRoute
+  '/bilimnoma': typeof BilimnomaIndexRoute
   '/clubs': typeof ClubsIndexRoute
   '/news': typeof NewsIndexRoute
   '/students': typeof StudentsIndexRoute
+  '/bilimnoma/$section/$id': typeof BilimnomaSectionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -281,6 +313,7 @@ export interface FileRoutesById {
   '/tests-manage': typeof TestsManageRoute
   '/admin/activity': typeof AdminActivityRoute
   '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/bilimnoma': typeof AdminBilimnomaRoute
   '/admin/center-clubs': typeof AdminCenterClubsRoute
   '/admin/counselors': typeof AdminCounselorsRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -288,14 +321,17 @@ export interface FileRoutesById {
   '/admin/rating': typeof AdminRatingRoute
   '/admin/schools': typeof AdminSchoolsRoute
   '/admin/tasks': typeof AdminTasksRoute
+  '/bilimnoma/$section': typeof BilimnomaSectionRoute
   '/clubs/$id': typeof ClubsIdRoute
   '/news/$id': typeof NewsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/test/$id': typeof TestIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/bilimnoma/': typeof BilimnomaIndexRoute
   '/clubs/': typeof ClubsIndexRoute
   '/news/': typeof NewsIndexRoute
   '/students/': typeof StudentsIndexRoute
+  '/bilimnoma/$section_/$id': typeof BilimnomaSectionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -316,6 +352,7 @@ export interface FileRouteTypes {
     | '/tests-manage'
     | '/admin/activity'
     | '/admin/applications'
+    | '/admin/bilimnoma'
     | '/admin/center-clubs'
     | '/admin/counselors'
     | '/admin/messages'
@@ -323,14 +360,17 @@ export interface FileRouteTypes {
     | '/admin/rating'
     | '/admin/schools'
     | '/admin/tasks'
+    | '/bilimnoma/$section'
     | '/clubs/$id'
     | '/news/$id'
     | '/students/$id'
     | '/test/$id'
     | '/admin/'
+    | '/bilimnoma/'
     | '/clubs/'
     | '/news/'
     | '/students/'
+    | '/bilimnoma/$section/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -349,6 +389,7 @@ export interface FileRouteTypes {
     | '/tests-manage'
     | '/admin/activity'
     | '/admin/applications'
+    | '/admin/bilimnoma'
     | '/admin/center-clubs'
     | '/admin/counselors'
     | '/admin/messages'
@@ -356,14 +397,17 @@ export interface FileRouteTypes {
     | '/admin/rating'
     | '/admin/schools'
     | '/admin/tasks'
+    | '/bilimnoma/$section'
     | '/clubs/$id'
     | '/news/$id'
     | '/students/$id'
     | '/test/$id'
     | '/admin'
+    | '/bilimnoma'
     | '/clubs'
     | '/news'
     | '/students'
+    | '/bilimnoma/$section/$id'
   id:
     | '__root__'
     | '/'
@@ -382,6 +426,7 @@ export interface FileRouteTypes {
     | '/tests-manage'
     | '/admin/activity'
     | '/admin/applications'
+    | '/admin/bilimnoma'
     | '/admin/center-clubs'
     | '/admin/counselors'
     | '/admin/messages'
@@ -389,14 +434,17 @@ export interface FileRouteTypes {
     | '/admin/rating'
     | '/admin/schools'
     | '/admin/tasks'
+    | '/bilimnoma/$section'
     | '/clubs/$id'
     | '/news/$id'
     | '/students/$id'
     | '/test/$id'
     | '/admin/'
+    | '/bilimnoma/'
     | '/clubs/'
     | '/news/'
     | '/students/'
+    | '/bilimnoma/$section_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -416,6 +464,7 @@ export interface RootRouteChildren {
   TestsManageRoute: typeof TestsManageRoute
   AdminActivityRoute: typeof AdminActivityRoute
   AdminApplicationsRoute: typeof AdminApplicationsRoute
+  AdminBilimnomaRoute: typeof AdminBilimnomaRoute
   AdminCenterClubsRoute: typeof AdminCenterClubsRoute
   AdminCounselorsRoute: typeof AdminCounselorsRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
@@ -423,14 +472,17 @@ export interface RootRouteChildren {
   AdminRatingRoute: typeof AdminRatingRoute
   AdminSchoolsRoute: typeof AdminSchoolsRoute
   AdminTasksRoute: typeof AdminTasksRoute
+  BilimnomaSectionRoute: typeof BilimnomaSectionRoute
   ClubsIdRoute: typeof ClubsIdRoute
   NewsIdRoute: typeof NewsIdRoute
   StudentsIdRoute: typeof StudentsIdRoute
   TestIdRoute: typeof TestIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  BilimnomaIndexRoute: typeof BilimnomaIndexRoute
   ClubsIndexRoute: typeof ClubsIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
   StudentsIndexRoute: typeof StudentsIndexRoute
+  BilimnomaSectionIdRoute: typeof BilimnomaSectionIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -554,6 +606,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClubsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bilimnoma/': {
+      id: '/bilimnoma/'
+      path: '/bilimnoma'
+      fullPath: '/bilimnoma/'
+      preLoaderRoute: typeof BilimnomaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/admin'
@@ -587,6 +646,13 @@ declare module '@tanstack/react-router' {
       path: '/clubs/$id'
       fullPath: '/clubs/$id'
       preLoaderRoute: typeof ClubsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bilimnoma/$section': {
+      id: '/bilimnoma/$section'
+      path: '/bilimnoma/$section'
+      fullPath: '/bilimnoma/$section'
+      preLoaderRoute: typeof BilimnomaSectionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/tasks': {
@@ -638,6 +704,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCenterClubsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/bilimnoma': {
+      id: '/admin/bilimnoma'
+      path: '/admin/bilimnoma'
+      fullPath: '/admin/bilimnoma'
+      preLoaderRoute: typeof AdminBilimnomaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/applications': {
       id: '/admin/applications'
       path: '/admin/applications'
@@ -650,6 +723,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/activity'
       fullPath: '/admin/activity'
       preLoaderRoute: typeof AdminActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bilimnoma/$section_/$id': {
+      id: '/bilimnoma/$section_/$id'
+      path: '/bilimnoma/$section/$id'
+      fullPath: '/bilimnoma/$section/$id'
+      preLoaderRoute: typeof BilimnomaSectionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -672,6 +752,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestsManageRoute: TestsManageRoute,
   AdminActivityRoute: AdminActivityRoute,
   AdminApplicationsRoute: AdminApplicationsRoute,
+  AdminBilimnomaRoute: AdminBilimnomaRoute,
   AdminCenterClubsRoute: AdminCenterClubsRoute,
   AdminCounselorsRoute: AdminCounselorsRoute,
   AdminMessagesRoute: AdminMessagesRoute,
@@ -679,14 +760,17 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRatingRoute: AdminRatingRoute,
   AdminSchoolsRoute: AdminSchoolsRoute,
   AdminTasksRoute: AdminTasksRoute,
+  BilimnomaSectionRoute: BilimnomaSectionRoute,
   ClubsIdRoute: ClubsIdRoute,
   NewsIdRoute: NewsIdRoute,
   StudentsIdRoute: StudentsIdRoute,
   TestIdRoute: TestIdRoute,
   AdminIndexRoute: AdminIndexRoute,
+  BilimnomaIndexRoute: BilimnomaIndexRoute,
   ClubsIndexRoute: ClubsIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
   StudentsIndexRoute: StudentsIndexRoute,
+  BilimnomaSectionIdRoute: BilimnomaSectionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

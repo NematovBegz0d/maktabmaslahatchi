@@ -23,6 +23,7 @@ import {
   Landmark,
   Shield,
   Newspaper,
+  BookOpen,
 } from "lucide-react";
 
 const NAV_LINK =
@@ -88,6 +89,12 @@ export function AppHeader() {
       show: roleKnown && isAdmin,
     },
     {
+      to: "/admin/bilimnoma" as const,
+      icon: BookOpen,
+      label: "Bilimnoma",
+      show: roleKnown && isAdmin,
+    },
+    {
       to: "/admin/rating" as const,
       icon: Trophy,
       label: "Reyting",
@@ -123,6 +130,12 @@ export function AppHeader() {
       to: "/my-profile" as const,
       icon: UserIcon,
       label: t("nav_profile"),
+      show: roleKnown && !isStaff,
+    },
+    {
+      to: "/bilimnoma" as const,
+      icon: BookOpen,
+      label: "Bilimnoma",
       show: roleKnown && !isStaff,
     },
     // Maslahatchi: maktab ichki ishlari (super admin bularga aralashmaydi —

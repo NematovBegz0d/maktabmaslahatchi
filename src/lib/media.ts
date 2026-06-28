@@ -3,7 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 const MAX_SIZE_MB = 5;
 
-export async function uploadMedia(file: File, folder: "news" | "clubs"): Promise<string> {
+export async function uploadMedia(
+  file: File,
+  folder: "news" | "clubs" | "bilimnoma",
+): Promise<string> {
   if (file.size > MAX_SIZE_MB * 1024 * 1024) {
     throw new Error(`Rasm hajmi ${MAX_SIZE_MB} MB dan oshmasin`);
   }

@@ -290,6 +290,9 @@ function Index() {
             <Link to="/news" className="transition-colors hover:text-violet-600">
               Yangiliklar
             </Link>
+            <Link to="/bilimnoma" className="transition-colors hover:text-violet-600">
+              Bilimnoma
+            </Link>
             <a href="#aloqa" className="transition-colors hover:text-violet-600">
               Aloqa
             </a>
