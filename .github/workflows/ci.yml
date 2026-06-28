@@ -31,10 +31,11 @@ jobs:
       - name: O'rnatish
         run: npm ci
 
-      # rollup, lightningcss va @tailwindcss/oxide'da install-script YO'Q, shuning
-      # uchun binari faqat optional-dep orqali keladi — Linux'da esa lockfile uni
-      # tushirib qoldirgani sabab yetishmaydi (build "Cannot find module
-      # ...linux-x64-gnu.node" bilan yiqiladi). esbuild bu yerda emas: unda
+      # rollup, lightningcss, @tailwindcss/oxide va rolldown'da install-script YO'Q,
+      # shuning uchun native binari faqat optional-dep orqali keladi — Linux'da esa
+      # lockfile uni tushirib qoldirgani sabab yetishmaydi (build "Cannot find module
+      # ...linux-x64-gnu.node" bilan yiqiladi). rolldown'ni nitro (TanStack Start
+      # build/prerender engine'i) ishlatadi. esbuild bu ro'yxatda emas: unda
       # hasInstallScript=true, o'z binarisini o'zi yuklab oladi.
       # Versiyalarni o'rnatilgan paketdan o'qiymiz — drift bo'lmaydi.
       - name: Linux native binarilari (npm #4828 vaqtinchalik yechimi)
@@ -42,7 +43,8 @@ jobs:
           npm install --no-save --legacy-peer-deps \
             "@rollup/rollup-linux-x64-gnu@$(node -p "require('rollup/package.json').version")" \
             "lightningcss-linux-x64-gnu@$(node -p "require('lightningcss/package.json').version")" \
-            "@tailwindcss/oxide-linux-x64-gnu@$(node -p "require('@tailwindcss/oxide/package.json').version")"
+            "@tailwindcss/oxide-linux-x64-gnu@$(node -p "require('@tailwindcss/oxide/package.json').version")" \
+            "@rolldown/binding-linux-x64-gnu@$(node -p "require('rolldown/package.json').version")"
 
       - name: Schema-sync (migratsiya ↔ types.ts drift)
         run: npm run check:schema
