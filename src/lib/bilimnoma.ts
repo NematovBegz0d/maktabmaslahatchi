@@ -57,6 +57,9 @@ import {
 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
+// Formatni qotiramiz: prettier 3.8 va 3.9+ union tip aliasini turlicha
+// formatlaydi, CI'dagi rollup-workaround esa prettier'ni yangilab yuboradi.
+// prettier-ignore
 export type BilimnomaSectionKey =
   | "kasblar"
   | "prezident_iqtidorli"
