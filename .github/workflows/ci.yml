@@ -17,9 +17,10 @@ jobs:
           node-version: "22"
           cache: npm
 
-      # Lockfile Windows'da yaratilgani uchun Linux rollup binarisini o'z ichiga
-      # olmaydi (npm bug #4828). npm ci bilan qadalgan daraxtni o'rnatamiz, so'ng
-      # yetishmagan Linux rollup binarisini qo'shamiz.
+      # Lockfile Windows'da yaratilgani uchun Linux uchun mo'ljallangan native
+      # binarilarni o'z ichiga olmaydi (npm bug #4828): u faqat win32 variantlarni
+      # yozadi. npm ci qadalgan daraxtni o'rnatadi, so'ng yetishmagan Linux
+      # binarilarini qo'lda qo'shamiz.
       #
       # MUHIM: `--no-package-lock` ATAYLAB OLIB TASHLANDI. U lockfile'ni chetlab
       # o'tib, paketlarni `^` oralig'ida yangiroq versiyalarga ko'tarardi
@@ -30,10 +31,18 @@ jobs:
       - name: O'rnatish
         run: npm ci
 
-      - name: Linux rollup binarisi (npm #4828 vaqtinchalik yechimi)
+      # rollup, lightningcss va @tailwindcss/oxide'da install-script YO'Q, shuning
+      # uchun binari faqat optional-dep orqali keladi — Linux'da esa lockfile uni
+      # tushirib qoldirgani sabab yetishmaydi (build "Cannot find module
+      # ...linux-x64-gnu.node" bilan yiqiladi). esbuild bu yerda emas: unda
+      # hasInstallScript=true, o'z binarisini o'zi yuklab oladi.
+      # Versiyalarni o'rnatilgan paketdan o'qiymiz — drift bo'lmaydi.
+      - name: Linux native binarilari (npm #4828 vaqtinchalik yechimi)
         run: |
           npm install --no-save --legacy-peer-deps \
-            "@rollup/rollup-linux-x64-gnu@$(node -p "require('rollup/package.json').version")"
+            "@rollup/rollup-linux-x64-gnu@$(node -p "require('rollup/package.json').version")" \
+            "lightningcss-linux-x64-gnu@$(node -p "require('lightningcss/package.json').version")" \
+            "@tailwindcss/oxide-linux-x64-gnu@$(node -p "require('@tailwindcss/oxide/package.json').version")"
 
       - name: Schema-sync (migratsiya ↔ types.ts drift)
         run: npm run check:schema
