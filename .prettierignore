@@ -6,3 +6,7 @@ pnpm-lock.yaml
 package-lock.json
 bun.lock
 routeTree.gen.ts
+# Supabase tomonidan generatsiya qilinadigan fayl (gen:types) — qo'lda
+# tahrirlanmaydi va prettier formatiga tushavermaydi. routeTree.gen.ts kabi
+# e'tiborsiz qoldiramiz (aks holda gen:types'dan keyin CI lint yiqiladi).
+src/integrations/supabase/types.ts
