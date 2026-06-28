@@ -17,17 +17,22 @@ jobs:
           node-version: "22"
           cache: npm
 
-      # Lockfile Windows'da yaratilgani uchun Linux rollup binarisini sanamaydi
-      # (npm bug #4828). Uni o'chirib toza resolve qilib bo'lmaydi — peer-dep
-      # konfliktiga uchraydi (vite-tanstack-config <-> nitro). Shuning uchun:
-      # npm ci bilan barqaror, qadalgan daraxt + yetishmagan Linux rollup
-      # binarisini (aynan o'sha versiyada) committed fayllarga tegmasdan qo'shamiz.
+      # Lockfile Windows'da yaratilgani uchun Linux rollup binarisini o'z ichiga
+      # olmaydi (npm bug #4828). npm ci bilan qadalgan daraxtni o'rnatamiz, so'ng
+      # yetishmagan Linux rollup binarisini qo'shamiz.
+      #
+      # MUHIM: `--no-package-lock` ATAYLAB OLIB TASHLANDI. U lockfile'ni chetlab
+      # o'tib, paketlarni `^` oralig'ida yangiroq versiyalarga ko'tarardi
+      # (vite 7.3.2 -> 7.3.6, tanstack, prettier 3.8 -> 3.9 ...) va bu prerender
+      # hamda lint regressiyalarini keltirib chiqarardi. `--no-package-lock`siz
+      # `npm install <paket>` lockfile'ni hurmat qiladi: faqat yetishmagan binarini
+      # qo'shadi, qolgan barcha versiya qadalganicha qoladi (drift yo'q).
       - name: O'rnatish
         run: npm ci
 
       - name: Linux rollup binarisi (npm #4828 vaqtinchalik yechimi)
         run: |
-          npm install --no-save --no-package-lock --legacy-peer-deps \
+          npm install --no-save --legacy-peer-deps \
             "@rollup/rollup-linux-x64-gnu@$(node -p "require('rollup/package.json').version")"
 
       - name: Schema-sync (migratsiya ↔ types.ts drift)
