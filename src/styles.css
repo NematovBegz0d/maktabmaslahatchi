@@ -192,3 +192,11 @@
 /* Gorizontal skroll lentalari uchun scrollbarni yashirish (mobil tab/nav lentalari) */
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Mobil pastki navigatsiya paneli ko'rsatilganda kontent uning ostida qolmasligi
+   uchun pastki bo'shliq (faqat mobil; xavfsiz hudud inset bilan). */
+@media (max-width: 767.98px) {
+  body.has-mobile-nav {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+}
