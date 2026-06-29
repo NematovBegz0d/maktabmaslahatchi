@@ -1285,6 +1285,8 @@ export type Database = {
       };
       in_my_school: { Args: { _user_id: string }; Returns: boolean };
       landing_stats: { Args: never; Returns: Json };
+      analytics_overview: { Args: never; Returns: Json };
+      counselor_dashboard: { Args: never; Returns: Json };
     };
     Enums: {
       app_role: "student" | "counselor" | "parent" | "admin";
