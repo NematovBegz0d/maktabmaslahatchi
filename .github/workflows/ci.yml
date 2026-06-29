@@ -37,14 +37,19 @@ jobs:
       # ...linux-x64-gnu.node" bilan yiqiladi). rolldown'ni nitro (TanStack Start
       # build/prerender engine'i) ishlatadi. esbuild bu ro'yxatda emas: unda
       # hasInstallScript=true, o'z binarisini o'zi yuklab oladi.
-      # Versiyalarni o'rnatilgan paketdan o'qiymiz — drift bo'lmaydi.
+      #
+      # Versiyalar lockfile'dagi qiymatlarga QAT'IY mos. Lockfile bu paketlarni
+      # yangilasa, bularni ham yangilang (netlify.toml'dagi bilan bir xil tutilsin).
+      # Eslatma: `node -p "require('lightningcss/package.json')"` ISHLAMAYDI —
+      # lightningcss o'z package.json'ini `exports` orqali bermaydi, shu sabab
+      # versiyalarni shu yerda qattiq yozamiz.
       - name: Linux native binarilari (npm #4828 vaqtinchalik yechimi)
         run: |
           npm install --no-save --legacy-peer-deps \
-            "@rollup/rollup-linux-x64-gnu@$(node -p "require('rollup/package.json').version")" \
-            "lightningcss-linux-x64-gnu@$(node -p "require('lightningcss/package.json').version")" \
-            "@tailwindcss/oxide-linux-x64-gnu@$(node -p "require('@tailwindcss/oxide/package.json').version")" \
-            "@rolldown/binding-linux-x64-gnu@$(node -p "require('rolldown/package.json').version")"
+            @rollup/rollup-linux-x64-gnu@4.60.2 \
+            lightningcss-linux-x64-gnu@1.32.0 \
+            @tailwindcss/oxide-linux-x64-gnu@4.2.4 \
+            @rolldown/binding-linux-x64-gnu@1.0.2
 
       - name: Schema-sync (migratsiya ↔ types.ts drift)
         run: npm run check:schema

@@ -4,10 +4,22 @@
 # ============================================================================
 
 [build]
-  # package-lock.json Windows'da yaratilgani uchun Linux Rollup native binary
-  # yo'q (npm optional-deps bug'i). Lock'ni o'chirib toza npm install qilamiz —
-  # shunda Linux uchun to'g'ri binary o'rnatiladi.
-  command = "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps && npm run build"
+  # MUHIM: lockfile'ni O'CHIRMAYMIZ. Avval uni `rm -rf` qilib toza `npm install`
+  # qilardik — bu paketlarni `^` oralig'ida eng yangi versiyaga ko'tarardi
+  # (vite 7.3.2 -> 7.3.6, tanstack/nitro ...). Yangi nitro server bundle'ni
+  # `dist/server` o'rniga `.netlify/functions-internal` ga chiqaradi, TanStack
+  # Start prerender'i esa `dist/server/server.js` ni topolmay `/` da 500 qaytarib
+  # build'ni yiqitardi (ERR_MODULE_NOT_FOUND).
+  #
+  # Buning o'rniga GitHub CI bilan bir xil yo'l: `npm ci` lockfile'ga qadaydi
+  # (vite 7.3.2 — prerender to'g'ri ishlaydi), so'ng Windows lockfile tushirib
+  # qoldirgan Linux native binarilarni qo'lda qo'shamiz (npm bug #4828).
+  #
+  # Versiyalar lockfile'dagi qiymatlarga QAT'IY mos bo'lishi shart. Lockfile bu
+  # paketlarni yangilasa, quyidagilarni ham yangilang — aks holda build native
+  # binary versiya nomuvofiqligi bilan OCHIQ yiqiladi (jim regressiya emas):
+  #   rollup, lightningcss, @tailwindcss/oxide, rolldown
+  command = "npm ci --legacy-peer-deps && npm install --no-save --legacy-peer-deps @rollup/rollup-linux-x64-gnu@4.60.2 lightningcss-linux-x64-gnu@1.32.0 @tailwindcss/oxide-linux-x64-gnu@4.2.4 @rolldown/binding-linux-x64-gnu@1.0.2 && npm run build"
   publish = "dist/client"
 
 [build.environment]
