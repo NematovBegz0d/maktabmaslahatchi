@@ -251,7 +251,7 @@ function TestRunner() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader />
+      <AppHeader bottomNav={false} />
       <main className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6">
           <div className="mb-2 flex items-center justify-between text-sm">
