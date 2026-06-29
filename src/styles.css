@@ -188,3 +188,7 @@
   .landing-float, .landing-float-slow, .landing-float-x, .landing-marquee { animation: none; }
   .reveal-init { opacity: 1; transform: none; }
 }
+
+/* Gorizontal skroll lentalari uchun scrollbarni yashirish (mobil tab/nav lentalari) */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

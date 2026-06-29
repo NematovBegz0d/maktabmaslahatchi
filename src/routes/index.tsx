@@ -58,6 +58,8 @@ import {
   Sparkles,
   PartyPopper,
   Landmark,
+  Menu,
+  X,
 } from "lucide-react";
 
 // "Kelajak" markazining ochiq sahifasi — login'siz (anon) ishlaydi
@@ -271,6 +273,8 @@ function Index() {
 
   // Qiziqish bildirish dialogi
   const [applyClub, setApplyClub] = useState<CenterClub | null>(null);
+  // Mobil navigatsiya menyusi
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const latestNews = (news ?? [])[0];
 
@@ -297,13 +301,70 @@ function Index() {
               Aloqa
             </a>
           </nav>
-          <Link
-            to="/auth"
-            className="rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-violet-200 transition-all hover:bg-violet-700 hover:shadow-lg"
-          >
-            Tizimga kirish
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/auth"
+              className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-bold text-white shadow-md shadow-violet-200 transition-all hover:bg-violet-700 hover:shadow-lg sm:px-5 sm:py-2.5"
+            >
+              Tizimga kirish
+            </Link>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label={menuOpen ? "Menyuni yopish" : "Menyuni ochish"}
+              aria-expanded={menuOpen}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-violet-100 text-violet-700 transition-colors hover:bg-violet-50 md:hidden"
+            >
+              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobil menyu paneli */}
+        {menuOpen && (
+          <nav
+            className="border-t border-violet-100 bg-white px-4 py-3 md:hidden"
+            aria-label="Mobil navigatsiya"
+          >
+            <div className="flex flex-col gap-1 text-sm font-semibold text-slate-700">
+              <a
+                href="#togaraklar"
+                onClick={() => setMenuOpen(false)}
+                className="rounded-lg px-3 py-2.5 transition-colors hover:bg-violet-50 hover:text-violet-700"
+              >
+                To'garaklar
+              </a>
+              <a
+                href="#yol"
+                onClick={() => setMenuOpen(false)}
+                className="rounded-lg px-3 py-2.5 transition-colors hover:bg-violet-50 hover:text-violet-700"
+              >
+                Qanday ishlaydi
+              </a>
+              <Link
+                to="/news"
+                onClick={() => setMenuOpen(false)}
+                className="rounded-lg px-3 py-2.5 transition-colors hover:bg-violet-50 hover:text-violet-700"
+              >
+                Yangiliklar
+              </Link>
+              <Link
+                to="/bilimnoma"
+                onClick={() => setMenuOpen(false)}
+                className="rounded-lg px-3 py-2.5 transition-colors hover:bg-violet-50 hover:text-violet-700"
+              >
+                Bilimnoma
+              </Link>
+              <a
+                href="#aloqa"
+                onClick={() => setMenuOpen(false)}
+                className="rounded-lg px-3 py-2.5 transition-colors hover:bg-violet-50 hover:text-violet-700"
+              >
+                Aloqa
+              </a>
+            </div>
+          </nav>
+        )}
       </header>
 
       {/* ── Yuguruvchi satr (eng so'nggi yangilik) ── */}

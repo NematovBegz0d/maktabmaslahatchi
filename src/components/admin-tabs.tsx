@@ -31,7 +31,7 @@ const TABS = [
 export function AdminTabs() {
   return (
     <nav
-      className="mb-6 flex flex-wrap gap-1 rounded-lg border border-border bg-muted/30 p-1"
+      className="no-scrollbar mb-6 flex gap-1 overflow-x-auto rounded-lg border border-border bg-muted/30 p-1"
       aria-label="Admin bo'limlari"
     >
       {TABS.map(({ to, icon: Icon, label }) => (
@@ -39,10 +39,10 @@ export function AdminTabs() {
           key={to}
           to={to}
           activeOptions={{ exact: to === "/admin" }}
-          className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:px-4"
           activeProps={{
             className:
-              "flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium bg-background text-foreground shadow-sm",
+              "flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium bg-background text-foreground shadow-sm sm:px-4",
           }}
         >
           <Icon className="h-4 w-4" aria-hidden="true" />
