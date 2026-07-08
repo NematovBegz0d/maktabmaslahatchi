@@ -590,8 +590,8 @@ function CredentialsCard({ results }: { results: RowResult[] }) {
             nusxalang.
           </p>
         )}
-        <div className="max-h-96 overflow-y-auto rounded-lg border border-border">
-          <table className="w-full text-sm">
+        <div className="max-h-96 overflow-auto rounded-lg border border-border">
+          <table className="w-full min-w-[34rem] text-sm">
             <thead className="sticky top-0 bg-muted/80 backdrop-blur">
               <tr className="text-left text-xs text-muted-foreground">
                 <th className="px-3 py-2 font-medium">F.I.Sh</th>

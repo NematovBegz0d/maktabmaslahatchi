@@ -4,6 +4,7 @@ import { Logo } from "./logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { NotificationBell } from "@/components/notification-bell";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/lib/theme";
@@ -31,7 +32,7 @@ const NAV_LINK =
 const NAV_LINK_ACTIVE =
   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-accent text-foreground";
 
-export function AppHeader() {
+export function AppHeader({ bottomNav = true }: { bottomNav?: boolean } = {}) {
   const navigate = useNavigate();
   const { role } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
@@ -169,106 +170,109 @@ export function AppHeader() {
   ].filter((l) => l.show);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        <Link to="/dashboard" aria-label="EduLens — bosh sahifa">
-          <Logo />
-        </Link>
+    <>
+      <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+          <Link to="/dashboard" aria-label="EduLens — bosh sahifa">
+            <Logo />
+          </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Asosiy navigatsiya">
-          {navLinks.map(({ to, icon: Icon, label, exact }) => (
-            <Link
-              key={to}
-              to={to}
-              activeOptions={{ exact: exact ?? false }}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              activeProps={{
-                className: "rounded-lg px-3 py-2 text-sm font-medium bg-accent text-foreground",
-              }}
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-1 md:flex" aria-label="Asosiy navigatsiya">
+            {navLinks.map(({ to, icon: Icon, label, exact }) => (
+              <Link
+                key={to}
+                to={to}
+                activeOptions={{ exact: exact ?? false }}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                activeProps={{
+                  className: "rounded-lg px-3 py-2 text-sm font-medium bg-accent text-foreground",
+                }}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  {label}
+                </span>
+              </Link>
+            ))}
+          </nav>
+
+          {/* O'ng taraf: bildirishnoma (maslahatchi), mavzu, chiqish */}
+          <div className="flex items-center gap-1">
+            {roleKnown && isCounselor && <NotificationBell />}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              aria-label={
+                resolvedTheme === "dark" ? "Yorug' rejimga o'tish" : "Qorong'u rejimga o'tish"
+              }
             >
-              <span className="inline-flex items-center gap-2">
-                <Icon className="h-4 w-4" aria-hidden="true" />
-                {label}
-              </span>
-            </Link>
-          ))}
-        </nav>
+              {resolvedTheme === "dark" ? (
+                <Sun className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Moon className="h-4 w-4" aria-hidden="true" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={signOut}
+              aria-label={t("nav_signout")}
+              className="hidden md:inline-flex"
+            >
+              <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+              {t("nav_signout")}
+            </Button>
 
-        {/* O'ng taraf: bildirishnoma (maslahatchi), mavzu, chiqish */}
-        <div className="flex items-center gap-1">
-          {roleKnown && isCounselor && <NotificationBell />}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            aria-label={
-              resolvedTheme === "dark" ? "Yorug' rejimga o'tish" : "Qorong'u rejimga o'tish"
-            }
-          >
-            {resolvedTheme === "dark" ? (
-              <Sun className="h-4 w-4" aria-hidden="true" />
-            ) : (
-              <Moon className="h-4 w-4" aria-hidden="true" />
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={signOut}
-            aria-label={t("nav_signout")}
-            className="hidden md:inline-flex"
-          >
-            <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
-            {t("nav_signout")}
-          </Button>
-
-          {/* Mobile hamburger */}
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="sm" className="md:hidden" aria-label="Menyuni ochish">
-                <Menu className="h-5 w-5" aria-hidden="true" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-64 p-0">
-              <SheetTitle className="sr-only">Navigatsiya</SheetTitle>
-              <div className="flex h-16 items-center border-b px-4">
-                <Logo />
-              </div>
-              <nav className="flex flex-col gap-1 p-3" aria-label="Mobil navigatsiya">
-                {navLinks.map(({ to, icon: Icon, label, exact }) => (
-                  <Link
-                    key={to}
-                    to={to}
-                    activeOptions={{ exact: exact ?? false }}
-                    className={NAV_LINK}
-                    activeProps={{ className: NAV_LINK_ACTIVE }}
-                    onClick={() => setOpen(false)}
-                  >
-                    <Icon className="h-4 w-4" aria-hidden="true" />
-                    {label}
-                  </Link>
-                ))}
-                <div className="mt-2 border-t pt-2">
-                  <button
-                    onClick={() => {
-                      setOpen(false);
-                      signOut();
-                    }}
-                    className={
-                      NAV_LINK + " w-full text-left text-destructive hover:text-destructive"
-                    }
-                    aria-label={t("nav_signout")}
-                  >
-                    <LogOut className="h-4 w-4" aria-hidden="true" />
-                    {t("nav_signout")}
-                  </button>
+            {/* Mobile hamburger */}
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="md:hidden" aria-label="Menyuni ochish">
+                  <Menu className="h-5 w-5" aria-hidden="true" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-64 p-0">
+                <SheetTitle className="sr-only">Navigatsiya</SheetTitle>
+                <div className="flex h-16 items-center border-b px-4">
+                  <Logo />
                 </div>
-              </nav>
-            </SheetContent>
-          </Sheet>
+                <nav className="flex flex-col gap-1 p-3" aria-label="Mobil navigatsiya">
+                  {navLinks.map(({ to, icon: Icon, label, exact }) => (
+                    <Link
+                      key={to}
+                      to={to}
+                      activeOptions={{ exact: exact ?? false }}
+                      className={NAV_LINK}
+                      activeProps={{ className: NAV_LINK_ACTIVE }}
+                      onClick={() => setOpen(false)}
+                    >
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                      {label}
+                    </Link>
+                  ))}
+                  <div className="mt-2 border-t pt-2">
+                    <button
+                      onClick={() => {
+                        setOpen(false);
+                        signOut();
+                      }}
+                      className={
+                        NAV_LINK + " w-full text-left text-destructive hover:text-destructive"
+                      }
+                      aria-label={t("nav_signout")}
+                    >
+                      <LogOut className="h-4 w-4" aria-hidden="true" />
+                      {t("nav_signout")}
+                    </button>
+                  </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+      {bottomNav && <MobileBottomNav />}
+    </>
   );
 }

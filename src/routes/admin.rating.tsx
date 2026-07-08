@@ -78,7 +78,7 @@ function AdminRating() {
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[48rem] text-sm">
                   <thead>
                     <tr className="border-b border-border text-left text-xs text-muted-foreground">
                       <th className="px-3 py-2 font-medium">O'rin</th>
