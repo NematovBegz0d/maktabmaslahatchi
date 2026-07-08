@@ -23,6 +23,7 @@ import {
 import { SubjectResults, type SubjectResult } from "@/components/subject-results";
 import { supabase } from "@/integrations/supabase/client";
 import { iqLabel, RADAR_COLORS, HOLLAND_INFO, TEMP_INFO } from "@/lib/profile-display";
+import { buildLocalAiSummary } from "@/lib/local-ai-summary";
 import { useStudentDetail } from "@/hooks/use-student-detail";
 import { IqDisclaimer } from "@/components/iq-disclaimer";
 import {
@@ -200,6 +201,17 @@ function StudentDetail() {
       };
     });
   const psychResults = (results ?? []).filter((r) => r.tests?.test_type !== "subject");
+
+  // Xulosa lokal generatordan — o'quvchi ma'lumotidan deterministik tuziladi
+  const aiSummary = buildLocalAiSummary({
+    classNumber: profile?.class_number ?? null,
+    radar: radarData,
+    iq: iqData,
+    hollandCode,
+    temperament,
+    topCareers,
+    subjects: subjectResults.map((s) => ({ name: s.name, percent: s.percent })),
+  });
 
   const sorted = [...radarData].sort((a, b) => b.value - a.value);
   const strengths = sorted.slice(0, 3).filter((x) => x.value >= 50);
@@ -776,8 +788,8 @@ function StudentDetail() {
             <h3 className="mb-3 font-semibold text-foreground flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-secondary" /> Psixologik xulosa (AI)
             </h3>
-            {sp?.ai_summary ? (
-              <AISummary text={sp.ai_summary as string} />
+            {aiSummary ? (
+              <AISummary text={aiSummary} />
             ) : (
               <p className="text-sm text-muted-foreground">
                 Hozircha AI tahlili tayyor emas. O'quvchi testlarni yakunlagach, bu yerda psixologik

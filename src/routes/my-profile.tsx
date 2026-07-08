@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/protected-route";
 import { AppHeader } from "@/components/app-header";
@@ -11,8 +10,8 @@ import { AISummary } from "@/components/ai-summary";
 import { SubjectResults, type SubjectResult } from "@/components/subject-results";
 import { QueryError } from "@/components/query-error";
 import { PortfolioSkeleton } from "@/components/portfolio-skeleton";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { buildLocalAiSummary } from "@/lib/local-ai-summary";
 import { iqLabel, RADAR_COLORS, HOLLAND_INFO, TEMP_INFO } from "@/lib/profile-display";
 import {
   useMyProfileData,
@@ -72,8 +71,9 @@ export const Route = createFileRoute("/my-profile")({
 
 function MyProfile() {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
   const [aiBusy, setAiBusy] = useState(false);
+  // Tahlil bir marta "yaratilgach" keyingi tashriflarda ham darhol ko'rinadi
+  const [aiShown, setAiShown] = useState(false);
 
   const { profile, sp, results, myClubs, allTests, loading, isError, refetch } = useMyProfileData(
     user?.id,
@@ -85,7 +85,6 @@ function MyProfile() {
   const completeness = sp?.profile_completeness ?? 0;
   const hollandCode = results?.find((r) => r.holland_code)?.holland_code ?? null;
   const temperament = results?.find((r) => r.personality_type)?.personality_type ?? null;
-  const aiSummary = sp?.ai_summary ?? null;
   const completedTestIds = new Set((results ?? []).map((r) => r.test_id));
   const totalTests = allTests?.length ?? 8;
   const completedCount = completedTestIds.size;
@@ -106,6 +105,25 @@ function MyProfile() {
     });
   const psychResults = (results ?? []).filter((r) => r.tests?.test_type !== "subject");
 
+  // Lokal "AI" xulosa — mavjud ma'lumotdan deterministik tuziladi
+  const aiSummary = buildLocalAiSummary({
+    classNumber: profile?.class_number ?? null,
+    radar: radarData,
+    iq: iqData,
+    hollandCode,
+    temperament,
+    topCareers,
+    subjects: subjectResults.map((s) => ({ name: s.name, percent: s.percent })),
+    clubsCount: myClubs?.length ?? 0,
+  });
+  // Avval yaratilgan bo'lsa (localStorage) yoki bazada eski tahlil qolgan
+  // bo'lsa — tugma bosilmasdan ham ko'rsatamiz
+  const aiStorageKey = user?.id ? `edulens-ai-shown:${user.id}` : null;
+  useEffect(() => {
+    if (aiStorageKey && localStorage.getItem(aiStorageKey) === "1") setAiShown(true);
+  }, [aiStorageKey]);
+  const aiVisible = !!aiSummary && (aiShown || !!sp?.ai_summary);
+
   // Kuchli va zaif tomonlar — radar ma'lumotidan
   const sorted = [...radarData].sort((a, b) => b.value - a.value);
   const strengths = sorted.slice(0, 3).filter((x) => x.value >= 50);
@@ -116,26 +134,20 @@ function MyProfile() {
     new Map(topCareers.flatMap((c) => c.universities ?? []).map((u) => [u.name, u])).values(),
   ).slice(0, 6);
 
-  async function generateAI() {
-    setAiBusy(true);
-    const { data, error } = await supabase.functions.invoke("analyze-profile", { body: {} });
-    setAiBusy(false);
-    if (error) {
-      // Funksiya xato matnini (masalan, kunlik limit — 429) o'qib ko'rsatamiz
-      let msg = "AI tahlilni yaratib bo'lmadi";
-      try {
-        const detail = await (error as { context?: Response }).context?.json();
-        if (detail?.error) msg = detail.error;
-      } catch {
-        /* javob JSON bo'lmasa umumiy xabar qoladi */
-      }
-      toast.error(msg);
+  // Xulosa lokal generatordan olinadi (Claude chaqirilmaydi) — qisqa kutish
+  // faqat UX uchun: tahlil "tayyorlanayotgani" his qilinadi
+  function generateAI() {
+    if (!aiSummary) {
+      toast.error("Avval kamida bitta testni yakunlang");
       return;
     }
-    toast.success(
-      (data as { cached?: boolean })?.cached ? "Tahlil yangilandi" : "AI tahlil tayyor!",
-    );
-    queryClient.invalidateQueries({ queryKey: ["student-profile", user?.id] });
+    setAiBusy(true);
+    window.setTimeout(() => {
+      setAiBusy(false);
+      setAiShown(true);
+      if (aiStorageKey) localStorage.setItem(aiStorageKey, "1");
+      toast.success("AI tahlil tayyor!");
+    }, 1200);
   }
 
   if (isError) {
@@ -690,15 +702,15 @@ function MyProfile() {
               <h3 className="font-semibold text-foreground flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-secondary" /> Psixologik xulosa (AI)
               </h3>
-              {aiSummary && (
+              {aiVisible && (
                 <Button size="sm" variant="ghost" onClick={generateAI} disabled={aiBusy}>
                   {aiBusy ? "Yangilanmoqda..." : "Qayta yaratish"}
                 </Button>
               )}
             </div>
 
-            {aiSummary ? (
-              <AISummary text={aiSummary} />
+            {aiVisible ? (
+              <AISummary text={aiSummary!} />
             ) : (
               <div className="rounded-xl border border-dashed border-border p-6 text-center">
                 <Heart className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />

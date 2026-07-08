@@ -7,6 +7,7 @@ import { AISummary } from "@/components/ai-summary";
 import { supabase } from "@/integrations/supabase/client";
 import { unwrap } from "@/lib/utils";
 import { HOLLAND_INFO, TEMP_INFO, iqLabel } from "@/lib/profile-display";
+import { buildLocalAiSummary } from "@/lib/local-ai-summary";
 import { useAuth } from "@/hooks/use-auth";
 import { IqDisclaimer } from "@/components/iq-disclaimer";
 import {
@@ -114,7 +115,6 @@ function MyReport() {
   const radarData = (sp?.radar_scores as RadarItem[] | null) ?? [];
   const iqData = (sp?.iq_scores as IqItem[] | null) ?? [];
   const topCareers = (sp?.top_careers as TopCareer[] | null) ?? [];
-  const aiSummary = (sp?.ai_summary as string | null) ?? null;
   const completeness = sp?.profile_completeness ?? 0;
   const hollandCode = results?.find((r) => r.holland_code)?.holland_code ?? null;
   const temperament = results?.find((r) => r.personality_type)?.personality_type ?? null;
@@ -132,6 +132,17 @@ function MyReport() {
         total: ss.total ?? 0,
       };
     });
+
+  // Xulosa lokal generatordan — bazadagi ai_summary o'rnini bosadi
+  const aiSummary = buildLocalAiSummary({
+    classNumber: profile?.class_number ?? null,
+    radar: radarData,
+    iq: iqData,
+    hollandCode,
+    temperament,
+    topCareers,
+    subjects: subjectResults.map((s) => ({ name: s.name, percent: s.percent })),
+  });
 
   const sorted = [...radarData].sort((a, b) => b.value - a.value);
   const strengths = sorted.slice(0, 3).filter((x) => x.value >= 50);
